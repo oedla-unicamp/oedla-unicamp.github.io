@@ -4,7 +4,7 @@ categories: chile, extrema direita, política, eleições
 authors: maria
 date: 2026-04-01
 excerpt: Kast venceu as eleições presidenciais e é o novo chefe de Estado chileno.
-image: assets/img/posts/kast.png
+image: img/capa.png
 ---
 
 José Antonio Kast, do Partido Republicano (PR), venceu o segundo turno das eleições presidenciais e é o novo chefe de Estado chileno. Conhecido por seu alinhamento com o legado da ditadura de Augusto Pinochet e por uma plataforma centrada na segurança pública de linha dura e no conservadorismo moral, Kast é o presidente mais à direita do espectro político desde o fim do regime militar (1973-1990).

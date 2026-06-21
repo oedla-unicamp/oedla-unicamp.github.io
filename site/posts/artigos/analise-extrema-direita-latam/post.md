@@ -5,7 +5,7 @@ authors: andre
 date: 2026-06-20
 excerpt: Uma análise comparada sobre a ascensão, as estratégias discursivas e a consolidação de movimentos radicais na região.
 type: blog
-image: assets/img/posts/latam.png
+image: img/capa.png
 ---
 
 Nos últimos anos, a América Latina tem testemunhado uma reconfiguração profunda de seu cenário político. A emergência e consolidação de forças de extrema direita em diversos países da região não representam fenômenos isolados, mas sim uma onda coordenada de contestação democrática que compartilha métodos, discursos e infraestruturas digitais.

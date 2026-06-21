@@ -6,4 +6,5 @@ Este repositório contém o código-fonte do site do LABIIA LAB, um laboratório
 
 - [Como adicionar integrantes](docs/COMO_ADICIONAR_INTEGRANTES.md)
 - [Como publicar posts no blog](docs/COMO_PUBLICAR_POSTS.md)
+- [Google Forms como injetor de conteúdo](docs/GOOGLE_FORMS_INJETOR.md)
 

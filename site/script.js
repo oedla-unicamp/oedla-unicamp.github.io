@@ -169,6 +169,37 @@ function buildIntegranteProfileUrl(slug) {
   return `integrante.html?slug=${encodeURIComponent(slug)}`;
 }
 
+function inferIconFromLink(titulo, url) {
+  const title = String(titulo || '').trim().toLocaleLowerCase('pt-BR');
+  const href = String(url || '').trim().toLocaleLowerCase('pt-BR');
+
+  if (!href) {
+    return '';
+  }
+
+  if (title.includes('lattes') || href.includes('lattes.cnpq.br')) {
+    return '';
+  }
+
+  const rules = [
+    { match: () => href.includes('orcid.org') || title === 'orcid', icon: 'orcid' },
+    { match: () => href.includes('instagram.com') || title.includes('instagram'), icon: 'instagram' },
+    { match: () => href.includes('linkedin.com') || title.includes('linkedin'), icon: 'linkedin' },
+    { match: () => href.includes('x.com') || href.includes('twitter.com') || title === 'x' || title.includes('twitter'), icon: 'x-twitter' },
+    { match: () => href.includes('bsky.app') || href.includes('bluesky') || title.includes('bluesky'), icon: 'bluesky' },
+    { match: () => href.includes('youtube.com') || href.includes('youtu.be') || title.includes('youtube'), icon: 'youtube' },
+    { match: () => href.includes('github.com') || title.includes('github'), icon: 'github' },
+    { match: () => href.includes('facebook.com') || title.includes('facebook'), icon: 'facebook' },
+    { match: () => href.includes('tiktok.com') || title.includes('tiktok'), icon: 'tiktok' },
+    { match: () => href.includes('t.me') || href.includes('telegram.') || title.includes('telegram'), icon: 'telegram' },
+    { match: () => href.includes('wa.me') || href.includes('whatsapp') || title.includes('whatsapp'), icon: 'whatsapp' },
+    { match: () => href.includes('mastodon') || title.includes('mastodon'), icon: 'mastodon' },
+  ];
+
+  const matched = rules.find((rule) => rule.match());
+  return matched ? matched.icon : '';
+}
+
 function resolveConfiguredIconClass(rawIcon) {
   const value = String(rawIcon || '').trim().toLocaleLowerCase('pt-BR');
   if (!value) {
@@ -217,7 +248,8 @@ function resolveConfiguredIconClass(rawIcon) {
 function buildSocialLink(link, cssClassName) {
   const title = escapeHtml(link.titulo || 'Link');
   const url = escapeHtml(link.url || '#');
-  const rawIcon = String(link.icone || link.icon || '').trim().toLocaleLowerCase('pt-BR');
+  const rawIcon = String(link.icone || link.icon || '').trim().toLocaleLowerCase('pt-BR')
+    || inferIconFromLink(link.titulo, link.url);
   const iconClass = resolveConfiguredIconClass(rawIcon);
   const hasIcon = Boolean(iconClass);
   const linkClasses = `${cssClassName}${hasIcon ? ' icon-only' : ' no-icon'}`;
@@ -370,18 +402,50 @@ function parseFrontMatter(markdownText) {
   return { metadata, body };
 }
 
-function resolveImagePath(rawPath) {
+function getPostBaseDir(postFile) {
+  const normalized = String(postFile || '').replace(/\\/g, '/');
+  const lastSlash = normalized.lastIndexOf('/');
+  if (lastSlash === -1) {
+    return '';
+  }
+  return normalized.slice(0, lastSlash);
+}
+
+function resolveImagePath(rawPath, postBaseDir = '') {
   if (!rawPath) {
     return '';
   }
   let path = String(rawPath).trim();
+  if (/^https?:\/\//i.test(path)) {
+    return path;
+  }
   if (path.startsWith('/')) {
     path = path.substring(1);
   }
   if (path.startsWith('assets/images/posts/')) {
     path = path.replace('assets/images/posts/', 'assets/img/posts/');
   }
+  if (
+    postBaseDir
+    && !path.startsWith('assets/')
+    && !path.startsWith('integrantes/')
+    && !path.startsWith('posts/')
+  ) {
+    path = `posts/${postBaseDir}/${path}`;
+  }
   return path;
+}
+
+function resolveBodyImagePlaceholders(markdownBody, postBaseDir) {
+  if (!markdownBody || !postBaseDir) {
+    return markdownBody;
+  }
+
+  return markdownBody.replace(/\{(\d+)(?:\.([a-zA-Z0-9]+))?\}/g, (match, num, ext) => {
+    const extension = (ext || 'jpg').toLowerCase();
+    const imagePath = resolveImagePath(`img/${num}.${extension}`, postBaseDir);
+    return `![Imagem ${num}](${imagePath})`;
+  });
 }
 
 function buildPostCard(post) {
@@ -486,15 +550,19 @@ function slugifyHeading(text, usedSlugs) {
   return slug;
 }
 
-function buildPostTocAndHtml(markdownBody) {
+function buildPostTocAndHtml(markdownBody, postBaseDir = '') {
+  const preparedBody = postBaseDir
+    ? resolveBodyImagePlaceholders(markdownBody, postBaseDir)
+    : markdownBody;
+
   if (!window.marked || typeof window.marked.parse !== 'function') {
     return {
-      html: `<pre>${escapeHtml(markdownBody)}</pre>`,
+      html: `<pre>${escapeHtml(preparedBody)}</pre>`,
       toc: [],
     };
   }
 
-  const rawHtml = window.marked.parse(markdownBody);
+  const rawHtml = window.marked.parse(preparedBody);
   const parser = new DOMParser();
   const doc = parser.parseFromString(rawHtml, 'text/html');
   const usedSlugs = new Set();
@@ -645,6 +713,7 @@ async function loadBlogList() {
       blogManifest.map(async (post) => {
         const markdown = await fetchText(`posts/${post.file}`);
         const { metadata } = parseFrontMatter(markdown);
+        const postBaseDir = getPostBaseDir(post.file);
 
         const categoriesRaw = parseListValue(
           metadata.categories || metadata.category || post.categories || post.category || 'análise'
@@ -670,7 +739,7 @@ async function loadBlogList() {
           sortTs: Date.parse(String(rawDate)) || 0,
           title: metadata.title || post.title || 'Sem título',
           excerpt: metadata.excerpt || post.excerpt || 'Sem resumo.',
-          image: resolveImagePath(metadata.image || post.image),
+          image: resolveImagePath(metadata.image || post.image, postBaseDir),
         };
       })
     );
@@ -706,6 +775,7 @@ async function loadNoticiasList() {
       noticiasManifest.map(async (post) => {
         const markdown = await fetchText(`posts/${post.file}`);
         const { metadata } = parseFrontMatter(markdown);
+        const postBaseDir = getPostBaseDir(post.file);
 
         const categoriesRaw = parseListValue(
           metadata.categories || metadata.category || post.categories || post.category || 'monitoramento'
@@ -730,7 +800,7 @@ async function loadNoticiasList() {
           sortTs: Date.parse(String(metadata.date || post.date || '')) || 0,
           title: metadata.title || post.title || 'Sem título',
           excerpt: metadata.excerpt || post.excerpt || 'Sem resumo.',
-          image: resolveImagePath(metadata.image || post.image),
+          image: resolveImagePath(metadata.image || post.image, postBaseDir),
         };
       })
     );
@@ -768,6 +838,7 @@ async function loadHomeLatestPosts() {
       combinedManifest.map(async (post, postIndex) => {
         const markdown = await fetchText(`posts/${post.file}`);
         const { metadata } = parseFrontMatter(markdown);
+        const postBaseDir = getPostBaseDir(post.file);
         const categoriesRaw = parseListValue(
           metadata.categories || metadata.category || post.categories || post.category || 'atualidades'
         );
@@ -783,7 +854,7 @@ async function loadHomeLatestPosts() {
           publishedAtTs: Number.isNaN(parsedDate) ? -1 : parsedDate,
           sourceIndex: postIndex,
           type: post.type,
-          image: resolveImagePath(metadata.image || post.image),
+          image: resolveImagePath(metadata.image || post.image, postBaseDir),
         };
       })
     );
@@ -852,7 +923,8 @@ async function loadPostPage() {
 
     const markdown = await fetchText(`posts/${post.file}`);
     const { metadata, body } = parseFrontMatter(markdown);
-    const image = resolveImagePath(metadata.image || post.image);
+    const postBaseDir = getPostBaseDir(post.file);
+    const image = resolveImagePath(metadata.image || post.image, postBaseDir);
     const title = metadata.title || post.title || 'Sem título';
     const categoriesRaw = parseListValue(
       metadata.categories || metadata.category || post.categories || post.category || 'publicação'
@@ -870,7 +942,7 @@ async function loadPostPage() {
     const date = formatPostDatePtBr(metadata.date || post.date);
     const excerpt = metadata.excerpt || post.excerpt || '';
 
-    const tocResult = buildPostTocAndHtml(body);
+    const tocResult = buildPostTocAndHtml(body, postBaseDir);
     const tocList = buildTocListMarkup(tocResult.toc);
 
     const isNews = post.type === 'noticia';

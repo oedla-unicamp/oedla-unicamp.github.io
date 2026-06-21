@@ -5,7 +5,7 @@ authors: geraldo
 date: 2026-06-18
 excerpt: Como algoritmos de recomendação e redes de desinformação atuam na difusão de discursos extremistas.
 type: blog
-image: assets/img/posts/redes-sociais.png
+image: img/capa.png
 ---
 
 A difusão da extrema direita latino-americana não pode ser compreendida sem a análise da ecologia de mídia digital. Plataformas como YouTube, TikTok, WhatsApp e Telegram transformaram-se em infraestruturas essenciais para a organização política, captação de recursos e circulação de narrativas radicais de forma direta e sem mediação editorial tradicional.

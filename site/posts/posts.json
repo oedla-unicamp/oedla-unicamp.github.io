@@ -2,25 +2,25 @@
   "artigos": [
     {
       "slug": "analise-extrema-direita-latam",
-      "file": "artigos/analise-extrema-direita-latam.md"
+      "file": "artigos/analise-extrema-direita-latam/post.md"
     },
     {
       "slug": "redes-sociais-radicalizacao",
-      "file": "artigos/redes-sociais-radicalizacao.md"
+      "file": "artigos/redes-sociais-radicalizacao/post.md"
     }
   ],
   "noticias": [
     {
       "slug": "jose-antonio-kast",
-      "file": "noticias/jose-antonio-kast.md"
+      "file": "noticias/jose-antonio-kast/post.md"
     },
     {
       "slug": "eleicoes-legislativas-regiao",
-      "file": "noticias/eleicoes-legislativas-regiao.md"
+      "file": "noticias/eleicoes-legislativas-regiao/post.md"
     },
     {
       "slug": "lancamento-observatorio-oedla",
-      "file": "noticias/lancamento-observatorio-oedla.md"
+      "file": "noticias/lancamento-observatorio-oedla/post.md"
     }
   ]
 }

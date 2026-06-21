@@ -5,7 +5,7 @@ authors: andre
 date: 2026-06-12
 excerpt: O portal entra no ar com análises acadêmicas e pesquisas aprofundadas sobre os desafios democráticos contemporâneos.
 type: noticia
-image: assets/img/logo.png
+image: img/capa.png
 ---
 
 Temos a satisfação de anunciar o lançamento do portal do Observatório da Extrema Direita Latino-americana (OEDLA). A plataforma nasce com a proposta de atuar como um centro dinâmico de produção científica e debate público qualificado, investigando os contornos locais das forças políticas reacionárias.
