@@ -734,6 +734,13 @@ a:hover {
     background: var(--surface);
   }
 
+  .integrante-avatar--profile {
+    width: 180px;
+    height: 180px;
+    border-width: 3px;
+    flex-shrink: 0;
+  }
+
   .integrante-head-text h2 {
     margin: 0;
     font-size: 1.5rem;
@@ -899,6 +906,10 @@ a:hover {
 
     .mission-grid,
     .axis-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .home-sections-split {
       grid-template-columns: 1fr;
     }
 

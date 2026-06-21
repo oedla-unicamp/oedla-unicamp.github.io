@@ -996,7 +996,7 @@ async function loadIntegranteProfilePage() {
   container.innerHTML = `
     <p class="preview-meta">Perfil de integrante</p>
     <div class="integrante-head">
-      ${imagem ? `<img class="integrante-avatar" src="${imagem}" alt="Foto de ${nome}" loading="lazy">` : ''}
+      ${imagem ? `<img class="integrante-avatar integrante-avatar--profile" src="${imagem}" alt="Foto de ${nome}" loading="lazy">` : ''}
       <div class="integrante-head-text">
         <h1 class="integrante-nome">${nome}</h1>
         <p class="integrante-role">${cargo}${cargo && formacao ? ' • ' : ''}${formacao}</p>
