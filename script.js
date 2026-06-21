@@ -298,7 +298,7 @@ async function loadLabSocialLinks() {
   }
 
   try {
-    const data = await fetchJson('redes/oedla.json');
+    const data = await fetchJson(getPath('redes/oedla.json'));
     const html = buildLabSocialLinks(data.redes || []);
     containers.forEach((container) => {
       container.innerHTML = html;
