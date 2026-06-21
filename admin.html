@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel CMS | OEDLA</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .admin-container {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .admin-nav {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .admin-nav button {
+      background: none;
+      border: none;
+      color: var(--text-color);
+      font-weight: 500;
+      cursor: pointer;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+    }
+    .admin-nav button.active {
+      background: var(--surface-bg);
+      border: 1px solid var(--border-color);
+    }
+    .admin-view {
+      display: none;
+    }
+    .admin-view.active {
+      display: block;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 2rem;
+    }
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .btn-sm {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.85rem;
+    }
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background: var(--bg-color);
+      color: var(--text-color);
+      font-family: inherit;
+    }
+    .editor-toolbar {
+      background: var(--surface-bg);
+      color: var(--text-color);
+      border-color: var(--border-color);
+    }
+    .editor-toolbar button {
+      color: var(--text-color) !important;
+    }
+    .editor-toolbar button.active, .editor-toolbar button:hover {
+      background: var(--bg-color);
+    }
+    .CodeMirror {
+      background: var(--bg-color);
+      color: var(--text-color);
+      border-color: var(--border-color);
+    }
+    .CodeMirror-cursor {
+      border-left-color: var(--text-color);
+    }
+    .image-preview {
+      margin-top: 0.5rem;
+      max-width: 200px;
+      display: block;
+    }
+    .image-upload-wrapper {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+  </style>
+</head>
+<body data-page="admin">
+  <div class="page-glow" aria-hidden="true"></div>
+  <div id="site-header"></div>
+
+  <main class="admin-container">
+    <div class="admin-header">
+      <h1>Painel CMS</h1>
+      <button id="logout-btn" class="btn btn-ghost">Sair</button>
+    </div>
+
+    <div class="admin-nav">
+      <button class="active" data-view="view-posts">Posts</button>
+      <button data-view="view-authors">Integrantes</button>
+    </div>
+
+    <!-- Posts View -->
+    <div id="view-posts" class="admin-view active">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h2>Gerenciar Posts</h2>
+        <button id="btn-new-post" class="btn btn-primary">Novo Post</button>
+      </div>
+      <table id="table-posts">
+        <thead>
+          <tr>
+            <th>Título</th>
+            <th>Tipo</th>
+            <th>Data</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="4">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Authors View -->
+    <div id="view-authors" class="admin-view">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h2>Gerenciar Integrantes</h2>
+        <button id="btn-new-author" class="btn btn-primary">Novo Integrante</button>
+      </div>
+      <table id="table-authors">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Cargo</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="3">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Post Editor -->
+    <div id="view-edit-post" class="admin-view">
+      <h2 id="post-editor-title">Editar Post</h2>
+      <form id="form-post">
+        <input type="hidden" id="post-original-id">
+        <input type="hidden" id="post-id">
+        <div class="form-group">
+          <label for="post-titulo">Título</label>
+          <input type="text" id="post-titulo" required>
+        </div>
+        <div class="form-group">
+          <label for="post-autor">Autor</label>
+          <div style="display: flex; gap: 0.5rem;">
+            <select id="post-autor" required style="flex: 1; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-color); color: var(--text-color);"></select>
+            <button type="button" class="btn btn-ghost" id="btn-add-author-from-post">[ + Novo Integrante ]</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="post-data">Data (YYYY-MM-DD)</label>
+          <input type="date" id="post-data" required>
+        </div>
+        <div class="form-group">
+          <label for="post-tipo">Tipo</label>
+          <select id="post-tipo" required>
+            <option value="artigo">Artigo (Blog)</option>
+            <option value="notícia">Notícia</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="post-categorias">Categorias (separadas por vírgula)</label>
+          <input type="text" id="post-categorias" placeholder="Política, Redes">
+        </div>
+        <div class="form-group">
+          <label for="post-tags">Tags (separadas por vírgula)</label>
+          <input type="text" id="post-tags">
+        </div>
+        <div class="form-group">
+          <label for="post-resumo">Resumo</label>
+          <textarea id="post-resumo" rows="3" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="post-capa-url">URL da Imagem de Capa</label>
+          <input type="url" id="post-capa-url" placeholder="https://...">
+          <img id="post-capa-preview" class="image-preview" src="" style="display:none; margin-top: 0.5rem;">
+        </div>
+        <div class="form-group">
+          <label>Conteúdo</label>
+          <p class="preview-meta" style="margin-bottom: 0.5rem;">Para adicionar imagens no texto, use o botão de imagem na barra do editor e cole a URL da imagem.</p>
+          <textarea id="post-conteudo"></textarea>
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn btn-primary" id="btn-save-post">Salvar</button>
+          <button type="button" class="btn btn-ghost" id="btn-cancel-post">Cancelar</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Author Editor -->
+    <div id="view-edit-author" class="admin-view">
+      <h2 id="author-editor-title">Editar Integrante</h2>
+      <form id="form-author">
+        <input type="hidden" id="author-original-id">
+        <input type="hidden" id="author-id">
+        <div class="form-group">
+          <label for="author-nome">Nome</label>
+          <input type="text" id="author-nome" required>
+        </div>
+        <div class="form-group">
+          <label for="author-cargo">Cargo</label>
+          <input type="text" id="author-cargo" required>
+        </div>
+        <div class="form-group">
+          <label for="author-formacao">Formação</label>
+          <input type="text" id="author-formacao">
+        </div>
+        <div class="form-group">
+          <label for="author-foto-url">URL da Foto de Perfil</label>
+          <input type="url" id="author-foto-url" placeholder="https://...">
+          <img id="author-foto-preview" class="image-preview" src="" style="display:none; margin-top: 0.5rem;">
+        </div>
+        <div class="form-group">
+          <label for="author-bio">Minibiografia</label>
+          <textarea id="author-bio" rows="4"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Redes e Contatos (Apenas URLs)</label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <input type="url" id="author-link-lattes" placeholder="Lattes URL">
+            <input type="url" id="author-link-orcid" placeholder="ORCID URL">
+            <input type="url" id="author-link-instagram" placeholder="Instagram URL">
+            <input type="url" id="author-link-x" placeholder="X (Twitter) URL">
+            <input type="url" id="author-link-bluesky" placeholder="Bluesky URL">
+            <input type="url" id="author-link-linkedin" placeholder="LinkedIn URL">
+          </div>
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn btn-primary" id="btn-save-author">Salvar</button>
+          <button type="button" class="btn btn-ghost" id="btn-cancel-author">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css"></script>
+  <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+  <script type="module" src="script.js"></script>
+  <script type="module">
+    import { auth, db } from './firebase-config.js';
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+    import { collection, getDocs, doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+    let easyMDE;
+    let cachedAuthors = [];
+    let returnToPostOnAuthorSave = false;
+
+    const generateSlug = (str) => str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = 'login.html';
+      } else {
+        await checkAdmin(user.uid);
+        initAdmin();
+      }
+    });
+
+    async function checkAdmin(uid) {
+      try {
+        const snap = await getDoc(doc(db, 'admins', uid));
+        if (!snap.exists()) {
+          alert('Acesso negado: Usuário não é administrador.');
+          await signOut(auth);
+        }
+      } catch (e) {
+        alert('Acesso negado.');
+        await signOut(auth);
+      }
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await signOut(auth);
+      window.location.href = 'index.html';
+    });
+
+    function switchView(viewId) {
+      document.querySelectorAll('.admin-view').forEach(v => v.classList.remove('active'));
+      document.getElementById(viewId).classList.add('active');
+    }
+
+    document.querySelectorAll('.admin-nav button').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.admin-nav button').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        switchView(e.target.dataset.view);
+      });
+    });
+
+    async function loadPosts() {
+      const tbody = document.querySelector('#table-posts tbody');
+      tbody.innerHTML = '<tr><td colspan="4">Carregando...</td></tr>';
+      try {
+        const snap = await getDocs(collection(db, 'posts'));
+        let html = '';
+        snap.forEach(docSnap => {
+          const p = docSnap.data();
+          html += `
+            <tr>
+              <td>${p.titulo || 'Sem título'}</td>
+              <td>${p.tipo || '-'}</td>
+              <td>${p.data || '-'}</td>
+              <td>
+                <button class="btn btn-sm btn-ghost" onclick="editPost('${docSnap.id}')">Editar</button>
+                <button class="btn btn-sm btn-ghost" style="color:#ff4a4a;" onclick="deletePost('${docSnap.id}')">Excluir</button>
+              </td>
+            </tr>
+          `;
+        });
+        tbody.innerHTML = html || '<tr><td colspan="4">Nenhum post encontrado.</td></tr>';
+      } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="4">Erro ao carregar posts.</td></tr>';
+      }
+    }
+
+    async function loadAuthors() {
+      const tbody = document.querySelector('#table-authors tbody');
+      const select = document.querySelector('#post-autor');
+      tbody.innerHTML = '<tr><td colspan="3">Carregando...</td></tr>';
+      try {
+        const snap = await getDocs(collection(db, 'authors'));
+        let html = '';
+        let selectHtml = '<option value="">Selecione o autor...</option>';
+        cachedAuthors = [];
+        snap.forEach(docSnap => {
+          const a = docSnap.data();
+          cachedAuthors.push(a);
+          html += `
+            <tr>
+              <td>${a.nome || 'Sem nome'}</td>
+              <td>${a.cargo || '-'}</td>
+              <td>
+                <button class="btn btn-sm btn-ghost" onclick="editAuthor('${docSnap.id}')">Editar</button>
+                <button class="btn btn-sm btn-ghost" style="color:#ff4a4a;" onclick="deleteAuthor('${docSnap.id}')">Excluir</button>
+              </td>
+            </tr>
+          `;
+          selectHtml += `<option value="${docSnap.id}">${a.nome}</option>`;
+        });
+        tbody.innerHTML = html || '<tr><td colspan="3">Nenhum integrante encontrado.</td></tr>';
+        select.innerHTML = selectHtml;
+      } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="3">Erro ao carregar integrantes.</td></tr>';
+      }
+    }
+
+    async function initAdmin() {
+      await loadAuthors();
+      await loadPosts();
+      
+      easyMDE = new EasyMDE({ 
+        element: document.getElementById('post-conteudo'),
+        spellChecker: false,
+        status: false
+      });
+    }
+
+    window.deletePost = async (id) => {
+      if(confirm('Tem certeza que deseja excluir este post?')) {
+        await deleteDoc(doc(db, 'posts', id));
+        loadPosts();
+      }
+    };
+
+    window.deleteAuthor = async (id) => {
+      if(confirm('Tem certeza que deseja excluir este integrante?')) {
+        await deleteDoc(doc(db, 'authors', id));
+        loadAuthors();
+      }
+    };
+
+    window.editPost = async (id) => {
+      switchView('view-edit-post');
+      document.getElementById('post-editor-title').innerText = 'Editar Post';
+      const snap = await getDoc(doc(db, 'posts', id));
+      const p = snap.data();
+      document.getElementById('post-original-id').value = id;
+      document.getElementById('post-id').value = id;
+      document.getElementById('post-titulo').value = p.titulo || '';
+      document.getElementById('post-autor').value = p.autor || '';
+      document.getElementById('post-data').value = p.data || '';
+      document.getElementById('post-tipo').value = p.tipo || 'artigo';
+      document.getElementById('post-categorias').value = (p.categorias || []).join(', ');
+      document.getElementById('post-tags').value = (p.tags || []).join(', ');
+      document.getElementById('post-resumo').value = p.resumo || '';
+      document.getElementById('post-capa-url').value = p.poster || '';
+      if(p.poster) {
+        document.getElementById('post-capa-preview').src = p.poster;
+        document.getElementById('post-capa-preview').style.display = 'block';
+      } else {
+        document.getElementById('post-capa-preview').style.display = 'none';
+      }
+      easyMDE.value(p.conteudo || '');
+    };
+
+    document.getElementById('btn-new-post').addEventListener('click', () => {
+      switchView('view-edit-post');
+      document.getElementById('post-editor-title').innerText = 'Novo Post';
+      document.getElementById('form-post').reset();
+      document.getElementById('post-original-id').value = '';
+      document.getElementById('post-capa-url').value = '';
+      document.getElementById('post-capa-preview').style.display = 'none';
+      easyMDE.value('');
+    });
+
+    document.getElementById('btn-add-author-from-post').addEventListener('click', () => {
+      returnToPostOnAuthorSave = true;
+      switchView('view-edit-author');
+      document.getElementById('author-editor-title').innerText = 'Novo Integrante';
+      document.getElementById('form-author').reset();
+      document.getElementById('author-original-id').value = '';
+      document.getElementById('author-id').value = '';
+      document.getElementById('author-foto-url').value = '';
+      document.getElementById('author-foto-preview').style.display = 'none';
+      ['lattes', 'orcid', 'instagram', 'x', 'bluesky', 'linkedin'].forEach(id => {
+        document.getElementById(`author-link-${id}`).value = '';
+      });
+    });
+
+    document.getElementById('btn-cancel-post').addEventListener('click', () => {
+      returnToPostOnAuthorSave = false;
+      switchView('view-posts');
+    });
+
+    window.editAuthor = async (id) => {
+      switchView('view-edit-author');
+      document.getElementById('author-editor-title').innerText = 'Editar Integrante';
+      const snap = await getDoc(doc(db, 'authors', id));
+      const a = snap.data();
+      document.getElementById('author-original-id').value = id;
+      document.getElementById('author-id').value = id;
+      document.getElementById('author-nome').value = a.nome || '';
+      document.getElementById('author-cargo').value = a.cargo || '';
+      document.getElementById('author-formacao').value = a.formacao || '';
+      document.getElementById('author-bio').value = a.minibiografia || '';
+      
+      const linkInputs = {
+        'Lattes': 'author-link-lattes',
+        'ORCID': 'author-link-orcid',
+        'Instagram': 'author-link-instagram',
+        'X': 'author-link-x',
+        'Bluesky': 'author-link-bluesky',
+        'LinkedIn': 'author-link-linkedin'
+      };
+      
+      Object.values(linkInputs).forEach(input => document.getElementById(input).value = '');
+      
+      (a.links || []).forEach(link => {
+        const inputId = linkInputs[link.titulo];
+        if (inputId) document.getElementById(inputId).value = link.url || '';
+      });
+
+      document.getElementById('author-foto-url').value = a.foto || '';
+      if(a.foto) {
+        document.getElementById('author-foto-preview').src = a.foto;
+        document.getElementById('author-foto-preview').style.display = 'block';
+      } else {
+        document.getElementById('author-foto-preview').style.display = 'none';
+      }
+    };
+
+    document.getElementById('btn-new-author').addEventListener('click', () => {
+      returnToPostOnAuthorSave = false;
+      switchView('view-edit-author');
+      document.getElementById('author-editor-title').innerText = 'Novo Integrante';
+      document.getElementById('form-author').reset();
+      document.getElementById('author-original-id').value = '';
+      document.getElementById('author-id').value = '';
+      document.getElementById('author-foto-url').value = '';
+      document.getElementById('author-foto-preview').style.display = 'none';
+      ['lattes', 'orcid', 'instagram', 'x', 'bluesky', 'linkedin'].forEach(id => {
+        document.getElementById(`author-link-${id}`).value = '';
+      });
+    });
+
+    document.getElementById('btn-cancel-author').addEventListener('click', () => {
+      if (returnToPostOnAuthorSave) {
+        returnToPostOnAuthorSave = false;
+        switchView('view-edit-post');
+      } else {
+        switchView('view-authors');
+      }
+    });
+
+    document.getElementById('post-capa-url').addEventListener('input', (e) => {
+      const url = e.target.value.trim();
+      const preview = document.getElementById('post-capa-preview');
+      if (url) {
+        preview.src = url;
+        preview.style.display = 'block';
+      } else {
+        preview.style.display = 'none';
+      }
+    });
+
+    document.getElementById('author-foto-url').addEventListener('input', (e) => {
+      const url = e.target.value.trim();
+      const preview = document.getElementById('author-foto-preview');
+      if (url) {
+        preview.src = url;
+        preview.style.display = 'block';
+      } else {
+        preview.style.display = 'none';
+      }
+    });
+
+    document.getElementById('form-post').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btn-save-post');
+      btn.innerText = 'Salvando...';
+      btn.disabled = true;
+
+      let id = document.getElementById('post-id').value.trim();
+      const oldId = document.getElementById('post-original-id').value;
+
+      if (!id && !oldId) {
+        id = generateSlug(document.getElementById('post-titulo').value);
+      } else if (oldId && !id) {
+        id = oldId;
+      }
+
+      const postData = {
+        id,
+        titulo: document.getElementById('post-titulo').value,
+        autor: document.getElementById('post-autor').value,
+        data: document.getElementById('post-data').value,
+        tipo: document.getElementById('post-tipo').value,
+        categorias: document.getElementById('post-categorias').value.split(',').map(s=>s.trim()).filter(Boolean),
+        tags: document.getElementById('post-tags').value.split(',').map(s=>s.trim()).filter(Boolean),
+        resumo: document.getElementById('post-resumo').value,
+        poster: document.getElementById('post-capa-url').value,
+        conteudo: easyMDE.value(),
+        imagens: []
+      };
+
+      try {
+        if(oldId && oldId !== id) {
+          await deleteDoc(doc(db, 'posts', oldId));
+        }
+        await setDoc(doc(db, 'posts', id), postData);
+        alert('Post salvo com sucesso!');
+        loadPosts();
+        switchView('view-posts');
+      } catch(err) {
+        alert('Erro ao salvar: ' + err.message);
+      } finally {
+        btn.innerText = 'Salvar';
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById('form-author').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btn-save-author');
+      btn.innerText = 'Salvando...';
+      btn.disabled = true;
+
+      let id = document.getElementById('author-id').value.trim();
+      const oldId = document.getElementById('author-original-id').value;
+
+      if (!id && !oldId) {
+        id = generateSlug(document.getElementById('author-nome').value);
+      } else if (oldId && !id) {
+        id = oldId;
+      }
+
+      let links = [];
+      const linkMap = {
+        'author-link-lattes': 'Lattes',
+        'author-link-orcid': 'ORCID',
+        'author-link-instagram': 'Instagram',
+        'author-link-x': 'X',
+        'author-link-bluesky': 'Bluesky',
+        'author-link-linkedin': 'LinkedIn'
+      };
+
+      Object.keys(linkMap).forEach(inputId => {
+        const url = document.getElementById(inputId).value.trim();
+        if (url) {
+          links.push({
+            titulo: linkMap[inputId],
+            url: url
+          });
+        }
+      });
+
+      const authorData = {
+        id,
+        nome: document.getElementById('author-nome').value,
+        cargo: document.getElementById('author-cargo').value,
+        formacao: document.getElementById('author-formacao').value,
+        minibiografia: document.getElementById('author-bio').value,
+        foto: document.getElementById('author-foto-url').value,
+        links
+      };
+
+      try {
+        if(oldId && oldId !== id) {
+          await deleteDoc(doc(db, 'authors', oldId));
+        }
+        await setDoc(doc(db, 'authors', id), authorData);
+        alert('Integrante salvo com sucesso!');
+        await loadAuthors();
+        
+        if (returnToPostOnAuthorSave) {
+          returnToPostOnAuthorSave = false;
+          document.getElementById('post-autor').value = id;
+          switchView('view-edit-post');
+        } else {
+          switchView('view-authors');
+        }
+      } catch(err) {
+        alert('Erro ao salvar: ' + err.message);
+      } finally {
+        btn.innerText = 'Salvar';
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
