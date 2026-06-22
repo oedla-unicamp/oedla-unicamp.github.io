@@ -66,19 +66,19 @@
   <div id="site-header"></div>
 
   <!-- Hero Section: Full width adapted background -->
-  <section class="hero-section overflow-hidden py-24 md:py-32 relative border-b border-gray-200 dark:border-gray-800">
+  <section class="hero-section overflow-hidden py-24 md:py-32 relative border-b border-gray-800 bg-[#111827] text-white">
     <!-- Grid Overlay -->
     <div class="absolute inset-0 opacity-20"
-      style="background-image: radial-gradient(var(--stroke) 1px, transparent 0); background-size: 24px 24px;"></div>
+      style="background-image: radial-gradient(rgba(255, 255, 255, 0.15) 1px, transparent 0); background-size: 24px 24px;"></div>
 
     <div class="max-w-5xl mx-auto px-6 relative z-10 grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
       <div class="col-span-1 md:col-span-7 flex flex-col items-start text-left">
-        <span class="font-sans text-xs font-bold uppercase tracking-widest text-primary mb-4">Investigação, Análise e
+        <span class="font-sans text-xs font-bold uppercase tracking-widest text-primary mb-4" id="hero-keywords">Investigação, Análise e
           Notícias</span>
-        <h1 class="font-serif text-4xl md:text-6xl font-bold leading-tight mb-6 text-gray-900 dark:text-white">
+        <h1 class="font-serif text-4xl md:text-6xl font-bold leading-tight mb-6 text-white" id="hero-title">
           Observatório da<br />Extrema Direita<br />Latino-Americana
         </h1>
-        <p class="font-sans text-base md:text-lg text-gray-600 dark:text-gray-400 leading-relaxed max-w-xl mb-8">
+        <p class="font-sans text-base md:text-lg text-gray-300 leading-relaxed max-w-xl mb-8" id="hero-subtitle">
           Produzimos e reunimos análises críticas e plurais sobre a extrema direita na América Latina. Informação
           rigorosa em defesa da democracia, dos direitos e do interesse público.
         </p>
@@ -88,20 +88,20 @@
             Ler Publicações
           </a>
           <a href="pages/noticias.html"
-            class="inline-flex items-center gap-2 px-6 py-3 font-sans font-bold text-sm uppercase tracking-wider border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-primary hover:text-primary transition-colors">
+            class="inline-flex items-center gap-2 px-6 py-3 font-sans font-bold text-sm uppercase tracking-wider border border-gray-700 text-gray-300 hover:border-primary hover:text-primary transition-colors">
             Notícias
           </a>
           <a href="pages/quemsomos.html"
-            class="inline-flex items-center gap-2 px-6 py-3 font-sans font-bold text-sm uppercase tracking-wider border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-primary hover:text-primary transition-colors">
+            class="inline-flex items-center gap-2 px-6 py-3 font-sans font-bold text-sm uppercase tracking-wider border border-gray-700 text-gray-300 hover:border-primary hover:text-primary transition-colors">
             Quem Somos
           </a>
         </div>
 
         <!-- Nossas Redes -->
         <div class="mt-8 flex flex-col gap-2.5">
-          <p class="font-sans text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Nossas Redes</p>
+          <p class="font-sans text-[10px] font-bold uppercase tracking-wider text-gray-400">Nossas Redes</p>
           <div class="flex flex-wrap gap-3" id="labiia-social-links">
-            <p class="font-sans text-xs text-gray-500">Carregando redes...</p>
+            <p class="font-sans text-xs text-gray-400">Carregando redes...</p>
           </div>
         </div>
       </div>
@@ -109,8 +109,11 @@
       <!-- Right Side Map Graphic -->
       <div
         class="hidden md:flex col-span-1 md:col-span-5 relative h-80 md:h-[400px] w-full items-center justify-center pointer-events-none">
-        <img src="assets/img/latin_america_map.png" alt="Mapa da América Latina"
-          class="absolute w-full h-full object-contain opacity-20 dark:opacity-60 dark:invert" />
+        <div
+          class="absolute w-24 md:w-48 h-12 md:h-24 bg-primary opacity-80 rounded-sm z-0 left-[30%] md:left-[35%] top-[25%] md:top-[30%] pointer-events-none">
+        </div>
+        <img src="https://jnspgpmdmouvkmoqaxlc.supabase.co/storage/v1/object/public/public-assets/latin_america_map.png" alt="Mapa da América Latina"
+          class="absolute w-full h-full object-contain opacity-60 invert z-10" />
       </div>
     </div>
   </section>

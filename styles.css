@@ -104,20 +104,16 @@ a:hover {
 }
 
 .site-header {
-  width: min(var(--content-max), calc(100% - (var(--page-gutter) * 2)));
-  margin: var(--page-gutter) auto 0;
-  padding: var(--page-gutter);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  position: relative;
-  z-index: 20;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
   background: var(--glass-surface);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-stroke);
-  border-radius: 8px;
+  border-bottom: 1px solid var(--glass-stroke);
   box-shadow: var(--shadow);
 }
 
@@ -321,6 +317,18 @@ a:hover {
 
   .social-link:hover,
   .integrante-link:hover {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .hero-section .social-link {
+    background: #1f2937;
+    color: #f9fafb;
+    border-color: #374151;
+  }
+
+  .hero-section .social-link:hover {
     border-color: var(--accent);
     background: var(--accent-soft);
     color: var(--accent);
@@ -917,11 +925,7 @@ a:hover {
   }
 
   @media (max-width: 700px) {
-    .site-header {
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-    }
+
 
     .brand {
       max-width: calc(100% - 52px);
@@ -1106,4 +1110,19 @@ a:hover {
 .scrollbar-none {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+@media (min-width: 768px) {
+  .hero-section .md\:w-48 {
+    width: 20rem;
+  }
+  .hero-section .md\:h-24 {
+    height: 4rem;
+  }
+  .hero-section .md\:top-\[30\%\] {
+    top: 43%;
+  }
+  .hero-section .md\:left-\[35\%\] {
+    left: 24%;
+  }
 }
