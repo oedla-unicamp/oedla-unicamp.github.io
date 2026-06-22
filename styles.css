@@ -322,6 +322,18 @@ a:hover {
     color: var(--accent);
   }
 
+  .hero-section {
+    min-height: min(calc(100vh - 74px), 650px);
+    display: flex;
+    align-items: center;
+  }
+
+  @media (min-width: 768px) {
+    .hero-section {
+      min-height: min(calc(100vh - 86px), 800px);
+    }
+  }
+
   .hero-section .social-link {
     background: #1f2937;
     color: #f9fafb;
