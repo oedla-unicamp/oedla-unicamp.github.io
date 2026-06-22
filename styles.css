@@ -1138,3 +1138,21 @@ a:hover {
     left: 24%;
   }
 }
+
+.font-archivo-narrow {
+  font-family: "Archivo Narrow", sans-serif;
+}
+
+.font-archivo-black {
+  font-family: "Archivo Black", sans-serif;
+}
+
+@media (min-width: 768px) {
+  .site-header .md\:h-24 {
+    height: 5rem;
+  }
+  .site-header .md\:left-\[68\%\] {
+    left: 80%;
+  }
+}
+

@@ -37,10 +37,23 @@ export async function loadHeroDynamic() {
     const info = await getInfoOedla();
     if (!info) return;
     if (heroKeywords) heroKeywords.textContent = info.keywords || '';
-    if (heroTitle) heroTitle.innerHTML = (info.titulo || '').replace(/\s+/g, (m, offset, str) => {
-      // Keep existing line break structure
-      return ' ';
-    });
+    if (heroTitle) {
+      const rawTitle = info.titulo || '';
+      if (rawTitle.toLowerCase().includes('observatório da') && rawTitle.toLowerCase().includes('extrema direita')) {
+        const part1 = "Observatório da";
+        const part2 = "Extrema Direita";
+        let part3 = rawTitle.slice(rawTitle.toLowerCase().indexOf('extrema direita') + part2.length).trim();
+        if (part3.startsWith('-')) part3 = part3.slice(1).trim();
+        
+        heroTitle.innerHTML = `
+          <span class="block font-archivo-narrow text-3xl sm:text-4xl md:text-5xl font-medium tracking-[0.18em] mb-2">Observatório da</span>
+          <span class="block font-archivo-black text-3xl sm:text-4xl md:text-5xl uppercase tracking-tight leading-none mb-1 text-white whitespace-nowrap">Extrema Direita</span>
+          <span class="block font-archivo-black text-3xl sm:text-4xl md:text-5xl uppercase tracking-tight leading-none text-white whitespace-nowrap">${part3}</span>
+        `;
+      } else {
+        heroTitle.textContent = rawTitle;
+      }
+    }
     if (heroSubtitle) heroSubtitle.textContent = info.subtitulo || '';
   } catch (e) { console.error(e); }
 }

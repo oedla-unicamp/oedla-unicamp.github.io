@@ -49,14 +49,24 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo+Narrow:ital,wght@0,400..700;1,400..700&family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       darkMode: ['class', '[data-theme="dark"]'],
-      theme: { extend: { colors: { primary: '#ffbf00' }, fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Playfair Display', 'serif'] } } }
+      theme: {
+        extend: {
+          colors: { primary: '#ffbf00' },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            serif: ['Playfair Display', 'serif'],
+            'archivo-narrow': ['"Archivo Narrow"', 'sans-serif'],
+            'archivo-black': ['"Archivo Black"', 'sans-serif']
+          }
+        }
+      }
     }
   </script>
 </head>
@@ -75,18 +85,20 @@
 
     <div class="max-w-6xl mx-auto px-6 relative z-10 grid grid-cols-1 md:grid-cols-12 gap-12 items-center w-full">
       <div
-        class="col-span-1 md:col-span-7 flex flex-col items-center md:items-start text-center md:text-left relative z-10">
+        class="col-span-1 md:col-span-7 flex flex-col items-center text-center relative z-10">
         <span class="font-sans text-xs font-bold uppercase tracking-widest text-primary mb-4"
           id="hero-keywords">Investigação, Análise e
           Notícias</span>
-        <h1 class="font-serif text-4xl md:text-6xl font-bold leading-tight mb-6 text-white" id="hero-title">
-          Observatório da<br />Extrema Direita<br />Latino-Americana
+        <h1 class="leading-tight mb-6 text-white text-center w-full" id="hero-title">
+          <span class="block font-archivo-narrow text-3xl sm:text-4xl md:text-5xl font-medium tracking-[0.18em] mb-2">Observatório da</span>
+          <span class="block font-archivo-black text-3xl sm:text-4xl md:text-5xl uppercase tracking-tight leading-none mb-1 text-white whitespace-nowrap">Extrema Direita</span>
+          <span class="block font-archivo-black text-3xl sm:text-4xl md:text-5xl uppercase tracking-tight leading-none text-white whitespace-nowrap">Latino-Americana</span>
         </h1>
         <p class="font-sans text-base md:text-lg text-gray-300 leading-relaxed max-w-xl mb-8" id="hero-subtitle">
           Produzimos e reunimos análises críticas e plurais sobre a extrema direita na América Latina. Informação
           rigorosa em defesa da democracia, dos direitos e do interesse público.
         </p>
-        <div class="flex flex-wrap gap-4 justify-center md:justify-start">
+        <div class="flex flex-wrap gap-4 justify-center">
           <a href="pages/blog.html"
             class="inline-flex items-center gap-2 px-6 py-3 font-sans font-bold text-sm uppercase tracking-wider bg-primary text-gray-900 hover:bg-yellow-400 transition-colors">
             Ler Publicações
@@ -102,9 +114,9 @@
         </div>
 
         <!-- Nossas Redes -->
-        <div class="mt-8 flex flex-col items-center md:items-start gap-2.5">
+        <div class="mt-8 flex flex-col items-center gap-2.5">
           <p class="font-sans text-[10px] font-bold uppercase tracking-wider text-gray-400">Nossas Redes</p>
-          <div class="flex flex-wrap gap-3 justify-center md:justify-start" id="labiia-social-links">
+          <div class="flex flex-wrap gap-3 justify-center" id="labiia-social-links">
             <p class="font-sans text-xs text-gray-400">Carregando redes...</p>
           </div>
         </div>
