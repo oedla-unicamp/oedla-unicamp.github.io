@@ -29,7 +29,7 @@ flowchart LR
 | Propriedade     | Valor                  |
 |-----------------|------------------------|
 | `GITHUB_TOKEN`  | seu PAT                |
-| `GITHUB_REPO`   | `geraldohomero/oedla`  |
+| `GITHUB_REPO`   | `oedla-unicamp/oedla-unicamp.github.io`  |
 
 5. Crie um gatilho:
    - Função: `onPostFormSubmit`
