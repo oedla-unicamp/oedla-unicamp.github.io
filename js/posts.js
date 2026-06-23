@@ -1,5 +1,5 @@
 import { supabase } from '../supabase-config.js';
-import { getPath, escapeHtml, formatPostDatePtBr, normalizeCategoryValue, formatCategoryLabel, slugifyHeading, getCurrentPageKey, updateMetaTags } from './utils.js';
+import { getPath, escapeHtml, formatPostDatePtBr, normalizeCategoryValue, formatCategoryLabel, slugifyHeading, getCurrentPageKey, updateMetaTags, setupImageZoom } from './utils.js';
 import { getIntegrantesIndex, resolveAuthorNames, buildIntegranteProfileUrl } from './authors.js';
 
 function buildPostTocAndHtml(markdownBody) {
@@ -49,7 +49,7 @@ function buildPostCard(post) {
         ${authorsText ? `<p class="font-sans text-xs md:text-sm font-semibold text-gray-500 mt-3">Por: ${authorsText}</p>` : ''}
       </div>
       <div class="col-span-4 md:col-span-3">
-        <img src="${escapeHtml(post.image || getPath('posts/img/place-holder.png'))}" alt="Capa do post: ${escapeHtml(post.title)}" class="${post.image ? 'w-full aspect-[4/3] object-cover rounded shadow-sm grayscale group-hover:grayscale-0 transition-all duration-500' : 'w-full aspect-[4/3] object-contain rounded opacity-80 dark:invert dark:opacity-50 transition-all duration-500'}">
+        <img src="${escapeHtml(post.image || getPath('posts/img/place-holder.png'))}" alt="Capa do post: ${escapeHtml(post.title)}" class="${post.image ? 'w-full aspect-[4/3] object-cover rounded shadow-sm transition-all duration-500' : 'w-full aspect-[4/3] object-contain rounded opacity-80 dark:invert dark:opacity-50 transition-all duration-500'}">
       </div>
     </article>
   `;
@@ -327,7 +327,7 @@ export async function loadPostPage() {
       </div>
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
         <div class="lg:col-span-8 flex flex-col">
-          ${image ? `<div class="mb-10 w-full"><img src="${escapeHtml(image)}" alt="Capa do post: ${escapeHtml(title)}" class="w-full h-auto aspect-video object-cover rounded grayscale hover:grayscale-0 transition-all duration-500 shadow-md"></div>` : ''}
+          ${image ? `<div class="mb-10 w-full"><img src="${escapeHtml(image)}" alt="Capa do post: ${escapeHtml(title)}" class="w-full h-auto aspect-video object-cover rounded transition-all duration-500 shadow-md"></div>` : ''}
           <p class="font-serif text-xl md:text-2xl text-gray-700 dark:text-gray-300 leading-relaxed italic mb-12 border-l-4 border-primary pl-6">${escapeHtml(excerpt)}</p>
           <details class="lg:hidden mb-12 border border-gray-200 dark:border-gray-800 rounded p-4">
             <summary class="font-sans text-sm font-bold uppercase tracking-widest text-gray-900 dark:text-white cursor-pointer">Sumário do artigo</summary>
@@ -342,6 +342,7 @@ export async function loadPostPage() {
         </aside>
       </div>
     `;
+    setupImageZoom(article);
   } catch (error) {
     article.innerHTML = '<h1>Erro ao carregar a publicação</h1>';
     console.error(error);

@@ -4,7 +4,7 @@ import { getPath, escapeHtml, formatPostDatePtBr, formatCategoryLabel } from './
 function buildHomeFourColumnCard(post) {
   const imageSrc = post.image || getPath('posts/img/place-holder.png');
   const imageClass = post.image
-    ? 'w-full h-full object-cover shadow-sm grayscale group-hover:grayscale-0 transition-all duration-500'
+    ? 'w-full h-full object-cover shadow-sm transition-all duration-500'
     : 'w-full h-full object-contain opacity-80 dark:invert dark:opacity-50 transition-all duration-500';
   
   return `
@@ -33,7 +33,7 @@ function buildHomeFourColumnCard(post) {
 function buildCarouselSlide(post, index, isActive = false) {
   const imageSrc = post.image || getPath('posts/img/place-holder.png');
   const imageClass = post.image
-    ? 'w-full aspect-video md:aspect-[4/3] object-cover rounded-lg shadow-md grayscale hover:grayscale-0 transition-all duration-500'
+    ? 'w-full aspect-video md:aspect-[4/3] object-cover rounded-lg shadow-md transition-all duration-500'
     : 'w-full aspect-video md:aspect-[4/3] object-contain rounded opacity-80 dark:invert dark:opacity-50 transition-all duration-500';
   
   const typeLabel = post.type === 'noticia' ? 'Notícia' : 'Análise';

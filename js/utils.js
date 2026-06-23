@@ -109,3 +109,58 @@ export function updateMetaTags({ title, description, image, url }) {
     setMeta('og:url', url, 'property');
   }
 }
+
+export function setupImageZoom(container) {
+  if (!container) return;
+
+  // Add class to change cursor to magnifying glass (lupa)
+  container.querySelectorAll('img').forEach(img => {
+    img.classList.add('zoomable-img');
+  });
+
+  // Get or create overlay
+  let overlay = document.querySelector('#image-zoom-overlay');
+  let zoomImg;
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'image-zoom-overlay';
+    zoomImg = document.createElement('img');
+    zoomImg.id = 'image-zoom-img';
+    overlay.appendChild(zoomImg);
+    document.body.appendChild(overlay);
+
+    // Dismiss overlay on click (anywhere on overlay)
+    overlay.addEventListener('click', () => {
+      overlay.classList.remove('active');
+    });
+  } else {
+    zoomImg = overlay.querySelector('img');
+  }
+
+  // Handle click on post/integrante images to show overlay
+  container.addEventListener('click', (e) => {
+    const img = e.target.closest('img');
+    if (!img) return;
+
+    // Prevent navigation if the image is wrapped in a link
+    e.preventDefault();
+
+    zoomImg.src = img.src;
+    zoomImg.alt = img.alt || '';
+
+    const setDimensions = () => {
+      const naturalWidth = img.naturalWidth;
+      const naturalHeight = img.naturalHeight;
+      zoomImg.style.width = naturalWidth ? `${naturalWidth}px` : 'auto';
+      zoomImg.style.height = naturalHeight ? `${naturalHeight}px` : 'auto';
+    };
+
+    if (img.complete) {
+      setDimensions();
+    } else {
+      img.addEventListener('load', setDimensions, { once: true });
+    }
+
+    overlay.classList.add('active');
+  });
+}

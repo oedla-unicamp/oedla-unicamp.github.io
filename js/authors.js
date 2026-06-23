@@ -1,5 +1,5 @@
 import { supabase } from '../supabase-config.js';
-import { escapeHtml, normalizeAuthorKey, updateMetaTags } from './utils.js';
+import { escapeHtml, normalizeAuthorKey, updateMetaTags, setupImageZoom } from './utils.js';
 import { buildImportantLinks } from './social.js';
 
 let integrantesIndexPromise;
@@ -150,4 +150,5 @@ export async function loadIntegranteProfilePage() {
     </div>
     ${postsMarkup}
   `;
+  setupImageZoom(container);
 }

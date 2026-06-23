@@ -1162,3 +1162,42 @@ a:hover {
   contain-intrinsic-size: auto 500px;
 }
 
+/* Image Zoom on Click Overlay */
+#image-zoom-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#image-zoom-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+  cursor: zoom-out;
+}
+
+#image-zoom-overlay img {
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+  transform: scale(0.95);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+  border-radius: 4px;
+}
+
+#image-zoom-overlay.active img {
+  transform: scale(1);
+}
+
+.zoomable-img {
+  cursor: zoom-in;
+}
+
