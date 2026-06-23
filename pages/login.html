@@ -86,19 +86,13 @@
       border: 1px solid rgba(255, 74, 74, 0.2);
     }
   </style>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: ['class', '[data-theme="dark"]'],
-      theme: { extend: { colors: { primary: '#ffbf00' }, fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Playfair Display', 'serif'] } } }
-    }
-  </script>
+  <link rel="stylesheet" href="../tailwind.css">
 </head>
 <body data-page="login">
   <div class="page-glow" aria-hidden="true"></div>
   <div id="site-header"></div>
 
-  <main>
+  <main id="main-content">
     <div class="login-container">
       <h1>Acesso ao CMS</h1>
       <p id="error-msg" class="error-msg">Email ou senha incorretos.</p>

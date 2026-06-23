@@ -1,35 +1,6 @@
 import { supabase } from '../supabase-config.js';
 import { getPath, escapeHtml, formatPostDatePtBr, getCurrentPageKey, updateMetaTags } from './utils.js';
-
-const mockEvents = {
-  '11111111-1111-1111-1111-111111111111': {
-    id: '11111111-1111-1111-1111-111111111111',
-    titulo: 'I Seminário Internacional sobre Extrema Direita',
-    data: '2026-10-25',
-    local: 'São Paulo, SP',
-    descricao: 'Um debate abrangente com especialistas latino-americanos discutindo a ascensão e os impactos das narrativas de extrema direita. O seminário contará com palestras magnas, painéis de discussão e apresentação de trabalhos científicos.\n\n### Programação Prevista:\n- **09:00** - Abertura oficial e credenciamento\n- **10:00** - Painel 1: Teorias da Conspiração e Política Regional\n- **14:00** - Painel 2: Economia e Autoritarismo\n- **17:00** - Palestra de encerramento\n\nParticipe presencialmente ou assista à transmissão ao vivo pelo canal oficial do OEDLA no YouTube.',
-    capa: '',
-    imagens: []
-  },
-  '22222222-2222-2222-2222-222222222222': {
-    id: '22222222-2222-2222-2222-222222222222',
-    titulo: 'Mesa Redonda: Mídias Sociais e Populismo',
-    data: '2026-11-12',
-    local: 'Online',
-    descricao: 'Análise das dinâmicas e algoritmos que facilitam a difusão de discursos populistas de extrema direita na América Latina. Nossos palestrantes debaterão o papel das grandes plataformas, a desinformação programática e os desafios regulatórios e democráticos.\n\n### Eixos Temáticos:\n1. Algoritmos de recomendação e radicalização\n2. Campanhas coordenadas de desinformação\n3. Regulação de plataformas sob perspectiva latino-americana',
-    capa: '',
-    imagens: []
-  },
-  '33333333-3333-3333-3333-333333333333': {
-    id: '33333333-3333-3333-3333-333333333333',
-    titulo: 'Conferência Regional: Democracia e Resistência',
-    data: '2026-12-05',
-    local: 'Buenos Aires, Argentina',
-    descricao: 'Mapeamento de iniciativas democráticas e estratégias de resistência frente ao avanço do autoritarismo regional. O evento reunirá ativistas, acadêmicos e formuladores de políticas públicas para construir pontes e propor soluções inovadoras.\n\nMais informações sobre as mesas redondas e chamadas para artigos acadêmicos serão divulgadas em breve.',
-    capa: '',
-    imagens: []
-  }
-};
+import DOMPurify from 'https://esm.sh/dompurify';
 
 function buildEventoHomeCard(evento) {
   const dateStr = formatPostDatePtBr(evento.data);
@@ -38,7 +9,7 @@ function buildEventoHomeCard(evento) {
   
   return `
     <article class="flex flex-col gap-4 p-6 bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 rounded-lg hover:shadow-md transition-all duration-300">
-      <div class="w-full aspect-[16/10] bg-gray-255 dark:bg-gray-800 rounded overflow-hidden relative">
+      <div class="w-full aspect-[16/10] bg-gray-200 dark:bg-gray-800 rounded overflow-hidden relative">
         <a href="${detailsUrl}"><img src="${escapeHtml(capaUrl)}" alt="Capa: ${escapeHtml(evento.titulo)}" class="w-full h-full object-cover rounded hover:scale-105 transition-all duration-300"></a>
       </div>
       <div class="flex flex-col justify-between flex-1">
@@ -66,7 +37,7 @@ function buildEventoListCard(evento) {
   
   return `
     <article class="flex flex-col md:flex-row gap-6 p-6 bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 rounded-lg hover:shadow-md transition-all duration-300 w-full">
-      <div class="md:w-1/3 shrink-0 h-48 md:h-40 bg-gray-255 dark:bg-gray-800 rounded overflow-hidden relative">
+      <div class="md:w-1/3 shrink-0 h-48 md:h-40 bg-gray-200 dark:bg-gray-800 rounded overflow-hidden relative">
         <a href="${detailsUrl}"><img src="${escapeHtml(capaUrl)}" alt="Capa: ${escapeHtml(evento.titulo)}" class="w-full h-full object-cover rounded hover:scale-105 transition-all duration-300"></a>
       </div>
       <div class="flex flex-col justify-between py-1 flex-1">
@@ -87,129 +58,32 @@ function buildEventoListCard(evento) {
   `;
 }
 
-const placeholdersHomeHtml = `
-  <article class="flex flex-col gap-4 p-6 bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 rounded-lg hover:shadow-md transition-all duration-300">
-    <div class="w-full aspect-[16/10] bg-gray-200 dark:bg-gray-800 rounded overflow-hidden relative">
-      <div class="absolute inset-0 bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">Capa do Evento</div>
-    </div>
-    <div class="flex flex-col justify-between flex-1">
-      <div>
-        <div class="flex items-center gap-2 mb-2">
-          <time class="font-sans text-xs font-bold uppercase tracking-widest text-primary">25 Out 2026</time>
-          <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700"></span>
-          <span class="font-sans text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">São Paulo, SP</span>
-        </div>
-        <h3 class="font-serif text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-          <a href="${getPath('pages/evento.html?slug=11111111-1111-1111-1111-111111111111')}" class="hover:text-primary transition-colors line-clamp-2">I Seminário Internacional sobre Extrema Direita</a>
-        </h3>
-        <p class="font-sans text-sm text-gray-600 dark:text-gray-400 line-clamp-3">Um debate abrangente com especialistas latino-americanos discutindo a ascensão e os impactos das narrativas de extrema direita.</p>
-      </div>
-      <a href="${getPath('pages/evento.html?slug=11111111-1111-1111-1111-111111111111')}" class="font-sans text-xs font-bold uppercase tracking-widest text-primary hover:underline mt-4 inline-block">Ver mais detalhes &rarr;</a>
-    </div>
-  </article>
+const emptyMessage = '<p class="font-sans text-sm text-gray-500 py-8 text-center col-span-full">Nenhum evento disponível no momento.</p>';
 
-  <article class="flex flex-col gap-4 p-6 bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 rounded-lg hover:shadow-md transition-all duration-300">
-    <div class="w-full aspect-[16/10] bg-gray-200 dark:bg-gray-800 rounded overflow-hidden relative">
-      <div class="absolute inset-0 bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">Capa do Evento</div>
-    </div>
-    <div class="flex flex-col justify-between flex-1">
-      <div>
-        <div class="flex items-center gap-2 mb-2">
-          <time class="font-sans text-xs font-bold uppercase tracking-widest text-primary">12 Nov 2026</time>
-          <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700"></span>
-          <span class="font-sans text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Online</span>
-        </div>
-        <h3 class="font-serif text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-          <a href="${getPath('pages/evento.html?slug=22222222-2222-2222-2222-222222222222')}" class="hover:text-primary transition-colors line-clamp-2">Mesa Redonda: Mídias Sociais e Populismo</a>
-        </h3>
-        <p class="font-sans text-sm text-gray-600 dark:text-gray-400 line-clamp-3">Análise das dinâmicas e algoritmos que facilitam a difusão de discursos populistas de extrema direita na América Latina.</p>
-      </div>
-      <a href="${getPath('pages/evento.html?slug=22222222-2222-2222-2222-222222222222')}" class="font-sans text-xs font-bold uppercase tracking-widest text-primary hover:underline mt-4 inline-block">Ver mais detalhes &rarr;</a>
-    </div>
-  </article>
+function getTodayStr() {
+  const d = new Date();
+  return [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2, '0'),
+    String(d.getDate()).padStart(2, '0')
+  ].join('-');
+}
 
-  <article class="flex flex-col gap-4 p-6 bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 rounded-lg hover:shadow-md transition-all duration-300">
-    <div class="w-full aspect-[16/10] bg-gray-200 dark:bg-gray-800 rounded overflow-hidden relative">
-      <div class="absolute inset-0 bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">Capa do Evento</div>
-    </div>
-    <div class="flex flex-col justify-between flex-1">
-      <div>
-        <div class="flex items-center gap-2 mb-2">
-          <time class="font-sans text-xs font-bold uppercase tracking-widest text-primary">05 Dez 2026</time>
-          <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700"></span>
-          <span class="font-sans text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Buenos Aires, Argentina</span>
-        </div>
-        <h3 class="font-serif text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-          <a href="${getPath('pages/evento.html?slug=33333333-3333-3333-3333-333333333333')}" class="hover:text-primary transition-colors line-clamp-2">Conferência Regional: Democracia e Resistência</a>
-        </h3>
-        <p class="font-sans text-sm text-gray-600 dark:text-gray-400 line-clamp-3">Mapeamento de iniciativas democráticas e estratégias de resistência frente ao avanço do autoritarismo regional.</p>
-      </div>
-      <a href="${getPath('pages/evento.html?slug=33333333-3333-3333-3333-333333333333')}" class="font-sans text-xs font-bold uppercase tracking-widest text-primary hover:underline mt-4 inline-block">Ver mais detalhes &rarr;</a>
-    </div>
-  </article>
-`;
-
-const placeholdersListHtml = `
-  <article class="flex flex-col md:flex-row gap-6 p-6 bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 rounded-lg hover:shadow-md transition-all duration-300 w-full">
-    <div class="md:w-1/3 shrink-0 h-48 md:h-40 bg-gray-200 dark:bg-gray-800 rounded overflow-hidden relative">
-      <div class="absolute inset-0 bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">Capa do Evento</div>
-    </div>
-    <div class="flex flex-col justify-between py-1 flex-1">
-      <div>
-        <div class="flex items-center gap-2 mb-2">
-          <time class="font-sans text-xs font-bold uppercase tracking-widest text-primary">25 Out 2026</time>
-          <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700"></span>
-          <span class="font-sans text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">São Paulo, SP</span>
-        </div>
-        <h3 class="font-serif text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-          <a href="${getPath('pages/evento.html?slug=11111111-1111-1111-1111-111111111111')}" class="hover:text-primary transition-colors">I Seminário Internacional sobre Extrema Direita</a>
-        </h3>
-        <p class="font-sans text-base text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-3">Um debate abrangente com especialistas latino-americanos discutindo a ascensão e os impactos das narrativas de extrema direita.</p>
-      </div>
-      <a href="${getPath('pages/evento.html?slug=11111111-1111-1111-1111-111111111111')}" class="font-sans text-xs font-bold uppercase tracking-widest text-primary hover:underline mt-4">Ver mais detalhes &rarr;</a>
-    </div>
-  </article>
-
-  <article class="flex flex-col md:flex-row gap-6 p-6 bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 rounded-lg hover:shadow-md transition-all duration-300 w-full">
-    <div class="md:w-1/3 shrink-0 h-48 md:h-40 bg-gray-200 dark:bg-gray-800 rounded overflow-hidden relative">
-      <div class="absolute inset-0 bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">Capa do Evento</div>
-    </div>
-    <div class="flex flex-col justify-between py-1 flex-1">
-      <div>
-        <div class="flex items-center gap-2 mb-2">
-          <time class="font-sans text-xs font-bold uppercase tracking-widest text-primary">12 Nov 2026</time>
-          <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700"></span>
-          <span class="font-sans text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Online</span>
-        </div>
-        <h3 class="font-serif text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-          <a href="${getPath('pages/evento.html?slug=22222222-2222-2222-2222-222222222222')}" class="hover:text-primary transition-colors">Mesa Redonda: Mídias Sociais e Populismo</a>
-        </h3>
-        <p class="font-sans text-base text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-3">Análise das dinâmicas e algoritmos que facilitam a difusão de discursos populistas de extrema direita na América Latina.</p>
-      </div>
-      <a href="${getPath('pages/evento.html?slug=22222222-2222-2222-2222-222222222222')}" class="font-sans text-xs font-bold uppercase tracking-widest text-primary hover:underline mt-4">Ver mais detalhes &rarr;</a>
-    </div>
-  </article>
-
-  <article class="flex flex-col md:flex-row gap-6 p-6 bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 rounded-lg hover:shadow-md transition-all duration-300 w-full">
-    <div class="md:w-1/3 shrink-0 h-48 md:h-40 bg-gray-200 dark:bg-gray-800 rounded overflow-hidden relative">
-      <div class="absolute inset-0 bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">Capa do Evento</div>
-    </div>
-    <div class="flex flex-col justify-between py-1 flex-1">
-      <div>
-        <div class="flex items-center gap-2 mb-2">
-          <time class="font-sans text-xs font-bold uppercase tracking-widest text-primary">05 Dez 2026</time>
-          <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700"></span>
-          <span class="font-sans text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Buenos Aires, Argentina</span>
-        </div>
-        <h3 class="font-serif text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-          <a href="${getPath('pages/evento.html?slug=33333333-3333-3333-3333-333333333333')}" class="hover:text-primary transition-colors">Conferência Regional: Democracia e Resistência</a>
-        </h3>
-        <p class="font-sans text-base text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-3">Mapeamento de iniciativas democráticas e estratégias de resistência frente ao avanço do autoritarismo regional.</p>
-      </div>
-      <a href="${getPath('pages/evento.html?slug=33333333-3333-3333-3333-333333333333')}" class="font-sans text-xs font-bold uppercase tracking-widest text-primary hover:underline mt-4">Ver mais detalhes &rarr;</a>
-    </div>
-  </article>
-`;
+function splitAndSortEvents(data) {
+  const todayStr = getTodayStr();
+  const future = [];
+  const past = [];
+  data.forEach(ev => {
+    if (ev.data && ev.data >= todayStr) {
+      future.push(ev);
+    } else {
+      past.push(ev);
+    }
+  });
+  future.sort((a, b) => new Date(a.data) - new Date(b.data));
+  past.sort((a, b) => new Date(b.data) - new Date(a.data));
+  return { future, past };
+}
 
 export async function loadHomeEventos() {
   const grid = document.querySelector('#home-eventos-grid');
@@ -223,35 +97,15 @@ export async function loadHomeEventos() {
     if (error) throw error;
     
     if (data && data.length) {
-      const d = new Date();
-      const todayStr = [
-        d.getFullYear(),
-        String(d.getMonth() + 1).padStart(2, '0'),
-        String(d.getDate()).padStart(2, '0')
-      ].join('-');
-
-      const future = [];
-      const past = [];
-      data.forEach(ev => {
-        if (ev.data && ev.data >= todayStr) {
-          future.push(ev);
-        } else {
-          past.push(ev);
-        }
-      });
-
-      future.sort((a, b) => new Date(a.data) - new Date(b.data));
-      past.sort((a, b) => new Date(b.data) - new Date(a.data));
-
-      // Shows up to 3 events, prioritizing upcoming ones
+      const { future, past } = splitAndSortEvents(data);
       const combined = [...future, ...past].slice(0, 3);
       grid.innerHTML = combined.map(buildEventoHomeCard).join('');
     } else {
-      grid.innerHTML = placeholdersHomeHtml;
+      grid.innerHTML = emptyMessage;
     }
   } catch (err) {
-    console.warn('Erro ao buscar eventos do banco, exibindo placeholders:', err);
-    grid.innerHTML = placeholdersHomeHtml;
+    console.warn('Erro ao buscar eventos:', err);
+    grid.innerHTML = emptyMessage;
   }
 }
 
@@ -267,25 +121,7 @@ export async function loadEventosList() {
     if (error) throw error;
     
     if (data && data.length) {
-      const d = new Date();
-      const todayStr = [
-        d.getFullYear(),
-        String(d.getMonth() + 1).padStart(2, '0'),
-        String(d.getDate()).padStart(2, '0')
-      ].join('-');
-
-      const future = [];
-      const past = [];
-      data.forEach(ev => {
-        if (ev.data && ev.data >= todayStr) {
-          future.push(ev);
-        } else {
-          past.push(ev);
-        }
-      });
-
-      future.sort((a, b) => new Date(a.data) - new Date(b.data));
-      past.sort((a, b) => new Date(b.data) - new Date(a.data));
+      const { future, past } = splitAndSortEvents(data);
 
       let html = '';
       if (future.length) {
@@ -307,13 +143,13 @@ export async function loadEventosList() {
         `;
       }
       
-      grid.innerHTML = html;
+      grid.innerHTML = html || emptyMessage;
     } else {
-      grid.innerHTML = placeholdersListHtml;
+      grid.innerHTML = emptyMessage;
     }
   } catch (err) {
-    console.warn('Erro ao buscar eventos do banco, exibindo placeholders:', err);
-    grid.innerHTML = placeholdersListHtml;
+    console.warn('Erro ao buscar eventos:', err);
+    grid.innerHTML = emptyMessage;
   }
 }
 
@@ -336,22 +172,12 @@ export async function loadEventoPage() {
       .single();
       
     if (error || !ev) {
-      // Fallback: check if we have it in mockEvents locally
-      if (mockEvents[slug]) {
-        renderEventDetail(mockEvents[slug], container);
-        return;
-      }
       container.innerHTML = '<h1>Evento não encontrado</h1>';
       return;
     }
     
     renderEventDetail(ev, container);
   } catch (err) {
-    // Fallback: check mockEvents on fatal error
-    if (mockEvents[slug]) {
-      renderEventDetail(mockEvents[slug], container);
-      return;
-    }
     container.innerHTML = '<h1>Erro ao carregar o evento</h1>';
     console.error(err);
   }
@@ -367,7 +193,7 @@ function renderEventDetail(ev, container) {
   
   let htmlContent = `<p class="whitespace-pre-wrap">${escapeHtml(desc)}</p>`;
   if (window.marked && typeof window.marked.parse === 'function') {
-    htmlContent = window.marked.parse(desc);
+    htmlContent = DOMPurify.sanitize(window.marked.parse(desc));
   }
   
   let galleryMarkup = '';

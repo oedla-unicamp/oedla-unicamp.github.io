@@ -127,6 +127,30 @@ function initHomeCarousel(slidesCount) {
   container.addEventListener('mouseenter', stopAutoplay);
   container.addEventListener('mouseleave', startAutoplay);
   
+  // Touch gestures for swipe support on mobile
+  let touchstartX = 0;
+  let touchendX = 0;
+  
+  function handleGesture() {
+    const threshold = 50;
+    if (touchendX < touchstartX - threshold) {
+      nextSlide();
+      startAutoplay();
+    } else if (touchendX > touchstartX + threshold) {
+      prevSlide();
+      startAutoplay();
+    }
+  }
+  
+  container.addEventListener('touchstart', e => {
+    touchstartX = e.changedTouches[0].screenX;
+  }, { passive: true });
+  
+  container.addEventListener('touchend', e => {
+    touchendX = e.changedTouches[0].screenX;
+    handleGesture();
+  }, { passive: true });
+  
   startAutoplay();
 }
 
@@ -143,7 +167,9 @@ export async function loadHomeLatestPosts() {
   try {
     const { data: postsData, error } = await supabase
       .from('posts')
-      .select('id, data, categorias, titulo, resumo, poster, tipo, destaque, autor');
+      .select('id, data, categorias, titulo, resumo, poster, tipo, destaque, autor')
+      .order('data', { ascending: false })
+      .limit(20);
     
     if (error) throw error;
 

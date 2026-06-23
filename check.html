@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CSS Brace Checker</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; background: #f0f2f5; }
+    #output { white-space: pre-wrap; background: #fff; padding: 1rem; border: 1px solid #ccc; border-radius: 4px; font-family: monospace; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <h2>CSS Brace Checker</h2>
+  <p>Select the CSS file to check:</p>
+  <input type="file" id="fileInput">
+  <div id="output">No file selected.</div>
+
+  <script>
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const content = evt.target.result;
+        let line = 1;
+        let col = 1;
+        const stack = [];
+        let log = '';
+        
+        // Let's strip comments first so braces in comments don't throw us off
+        // Note: Simple comment stripping that handles multiline comments
+        let cleanedContent = '';
+        let inComment = false;
+        
+        for (let i = 0; i < content.length; i++) {
+          if (!inComment && content[i] === '/' && content[i+1] === '*') {
+            inComment = true;
+            i++;
+            cleanedContent += '  '; // preserve space to keep indexes/columns aligned
+            continue;
+          }
+          if (inComment && content[i] === '*' && content[i+1] === '/') {
+            inComment = false;
+            i++;
+            cleanedContent += '  ';
+            continue;
+          }
+          
+          if (inComment) {
+            cleanedContent += content[i] === '\n' ? '\n' : ' ';
+          } else {
+            cleanedContent += content[i];
+          }
+        }
+
+        for (let i = 0; i < cleanedContent.length; i++) {
+          const char = cleanedContent[i];
+          if (char === '\n') {
+            line++;
+            col = 1;
+          } else {
+            col++;
+          }
+
+          if (char === '{') {
+            stack.push({ line, col: col - 1 });
+          } else if (char === '}') {
+            if (stack.length === 0) {
+              log += `Unmatched '}' at line ${line}, col ${col - 1}\n`;
+            } else {
+              stack.pop();
+            }
+          }
+        }
+
+        if (stack.length > 0) {
+          log += `Unmatched '{' remaining in stack (${stack.length} unmatched):\n`;
+          stack.forEach(item => {
+            log += `  Opened at line ${item.line}, col ${item.col}\n`;
+          });
+        } else if (log === '') {
+          log = 'All braces are matched!';
+        }
+        document.getElementById('output').textContent = log;
+      };
+      reader.readAsText(file);
+    });
+  </script>
+</body>
+</html>

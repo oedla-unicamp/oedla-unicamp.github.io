@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Supabase Connection Tester</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; background: #fafafa; }
+    #output { white-space: pre-wrap; background: #fff; padding: 1rem; border: 1px solid #ccc; border-radius: 4px; font-family: monospace; }
+    .status-ok { color: green; font-weight: bold; }
+    .status-error { color: red; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h2>Supabase Connection Tester</h2>
+  <div id="output">Running connection tests...</div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+    const SUPABASE_URL = 'https://jnspgpmdmouvkmoqaxlc.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impuc3BncG1kbW91dmttb3FheGxjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMjYyMDMsImV4cCI6MjA5NzcwMjIwM30.Kv5gZ3R_Z2KoIKzE1sKzf2j0FAFOr_4Sl6G38Wj3-Hk';
+
+    const output = document.getElementById('output');
+    let log = '';
+
+    function print(msg, status = '') {
+      const cls = status ? ` class="status-${status}"` : '';
+      log += `<div${cls}>${msg}</div>`;
+      output.innerHTML = log;
+    }
+
+    async function run() {
+      try {
+        print('Initializing Supabase client...');
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        print('Client initialized successfully.', 'ok');
+
+        print('Testing getSession()...');
+        const sessionRes = await supabase.auth.getSession();
+        print(`getSession resolved: session is ${sessionRes.data.session ? 'ACTIVE' : 'NULL'}`, 'ok');
+
+        print('Fetching posts from "posts" table...');
+        const { data: posts, error: postsError } = await supabase
+          .from('posts')
+          .select('*')
+          .limit(3);
+        
+        if (postsError) {
+          print(`Error fetching posts: ${postsError.message} (code: ${postsError.code})`, 'error');
+        } else {
+          print(`Success fetching posts: ${posts.length} records found.`, 'ok');
+          print(JSON.stringify(posts, null, 2));
+        }
+
+        print('Fetching authors from "authors" table...');
+        const { data: authors, error: authorsError } = await supabase
+          .from('authors')
+          .select('*')
+          .limit(3);
+        
+        if (authorsError) {
+          print(`Error fetching authors: ${authorsError.message} (code: ${authorsError.code})`, 'error');
+        } else {
+          print(`Success fetching authors: ${authors.length} records found.`, 'ok');
+          print(JSON.stringify(authors, null, 2));
+        }
+
+      } catch (err) {
+        print(`Fatal JS Error: ${err.message}`, 'error');
+        console.error(err);
+      }
+    }
+
+    run();
+  </script>
+</body>
+</html>

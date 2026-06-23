@@ -278,6 +278,18 @@
       box-shadow: 0 0 0 3px rgba(255, 191, 0, 0.15);
     }
 
+    .missao-item-row {
+      background: var(--bg);
+      border: 1px solid var(--stroke);
+      border-radius: 6px;
+      padding: 1rem;
+      margin-top: 0.75rem;
+    }
+
+    .missao-item-row span {
+      color: var(--muted);
+    }
+
     .editor-toolbar {
       background: var(--surface);
       color: var(--ink);
@@ -370,20 +382,134 @@
       from { transform: translate(0, -50%); }
       to { transform: translate(3px, -50%); }
     }
-  </style>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: ['class', '[data-theme="dark"]'],
-      theme: { extend: { colors: { primary: '#ffbf00' }, fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Playfair Display', 'serif'] } } }
+
+    /* Toast Notifications */
+    #toast-container {
+      position: fixed;
+      top: 1.5rem;
+      right: 1.5rem;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      pointer-events: none;
     }
-  </script>
+
+    .toast {
+      pointer-events: auto;
+      min-width: 300px;
+      max-width: 400px;
+      background: var(--surface);
+      color: var(--ink);
+      border: 1px solid var(--stroke);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(-20px) scale(0.95);
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .toast i {
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .toast-success {
+      border-left: 4px solid #10b981;
+    }
+    .toast-success i {
+      color: #10b981;
+    }
+
+    .toast-error {
+      border-left: 4px solid #ef4444;
+    }
+    .toast-error i {
+      color: #ef4444;
+    }
+
+    .toast-info {
+      border-left: 4px solid var(--accent);
+    }
+    .toast-info i {
+      color: var(--accent);
+    }
+
+    /* Badges & Enhancements */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-radius: 4px;
+    }
+    .badge-artigo {
+      background: rgba(59, 130, 246, 0.1);
+      color: #3b82f6;
+      border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+    .badge-noticia {
+      background: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+    .badge-destaque {
+      background: rgba(255, 191, 0, 0.15);
+      color: #cc9800;
+      border: 1px solid rgba(255, 191, 0, 0.3);
+      gap: 0.25rem;
+    }
+    
+    /* Loading skeletons */
+    .skeleton-row {
+      position: relative;
+      overflow: hidden;
+    }
+    .skeleton-line {
+      height: 1.25rem;
+      background: var(--stroke);
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+    .skeleton-line::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      transform: translateX(-100%);
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      animation: shimmer 1.5s infinite;
+    }
+    @keyframes shimmer {
+      100% {
+        transform: translateX(100%);
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="../tailwind.css">
 </head>
 <body data-page="admin">
   <div class="page-glow" aria-hidden="true"></div>
   <div id="site-header"></div>
 
-  <main class="admin-container">
+  <main id="main-content" class="admin-container">
     <div class="admin-header">
       <h1>Painel CMS</h1>
       <button id="logout-btn" class="btn btn-ghost">Sair</button>
@@ -536,9 +662,10 @@
           <label for="info-atividades">Parágrafos de Atividades (um por linha)</label>
           <textarea id="info-atividades" rows="4"></textarea>
         </div>
-        <div class="form-group">
-          <label>Missão de Difusão (formatado como Título|Descrição, uma por linha)</label>
-          <textarea id="info-missao" rows="6" placeholder="Produção Científica|Divulgação da produção científica da equipe..."></textarea>
+        <div class="form-group mb-6">
+          <label>Missão de Difusão</label>
+          <div id="info-missao-container" class="space-y-3 mb-2"></div>
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-info-add-missao">+ Adicionar Item de Difusão</button>
         </div>
 
         <h3 class="font-serif text-xl font-bold mt-6 mb-4 pb-1 border-b border-gray-200 dark:border-gray-800">Página de Blog & Notícias</h3>
@@ -739,7 +866,39 @@
   <script type="module">
     import { supabase, SUPABASE_URL } from '../supabase-config.js';
 
+    // Dynamic Toast container injection and helper
+    const toastContainer = document.createElement('div');
+    toastContainer.id = 'toast-container';
+    document.body.appendChild(toastContainer);
+
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      let icon = 'fa-circle-check';
+      if (type === 'error') icon = 'fa-circle-xmark';
+      if (type === 'info') icon = 'fa-circle-info';
+      
+      toast.innerHTML = `
+        <i class="fa-solid ${icon}"></i>
+        <span>${message}</span>
+      `;
+      toastContainer.appendChild(toast);
+      
+      // Trigger reflow
+      toast.offsetHeight;
+      toast.classList.add('show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+        toast.addEventListener('transitionend', () => toast.remove());
+      }, 4000);
+    }
+
     let easyMDE;
+    let easyMDEEvento;
+    let easyMDEQuemSomos;
+    let easyMDEOrigem;
+    let easyMDEAtividades;
     let cachedAuthors = [];
     let returnToPostOnAuthorSave = false;
 
@@ -786,6 +945,54 @@
       createOtherLinkRow('author-other-links-container');
     });
 
+    function createMissaoItemRow(containerId, titulo = '', descricao = '') {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      const row = document.createElement('div');
+      row.className = 'flex flex-col gap-2 missao-item-row w-full';
+      
+      const headerRow = document.createElement('div');
+      headerRow.className = 'flex justify-between items-center w-full';
+      
+      const label = document.createElement('span');
+      label.className = 'text-xs font-bold uppercase tracking-wider';
+      label.innerText = 'Item de Difusão';
+      
+      const deleteBtn = document.createElement('button');
+      deleteBtn.type = 'button';
+      deleteBtn.className = 'btn btn-ghost btn-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20';
+      deleteBtn.style.padding = '0.25rem 0.5rem';
+      deleteBtn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Remover';
+      deleteBtn.onclick = () => row.remove();
+      
+      headerRow.appendChild(label);
+      headerRow.appendChild(deleteBtn);
+      
+      const titleInput = document.createElement('input');
+      titleInput.type = 'text';
+      titleInput.placeholder = 'Título do Item (Ex: Produção Científica)';
+      titleInput.className = 'missao-item-titulo w-full font-semibold';
+      titleInput.value = titulo;
+      titleInput.required = true;
+      
+      const descInput = document.createElement('textarea');
+      descInput.placeholder = 'Descrição (Ex: Divulgação da produção científica da equipe...)';
+      descInput.className = 'missao-item-descricao w-full';
+      descInput.rows = 2;
+      descInput.value = descricao;
+      descInput.required = true;
+      
+      row.appendChild(headerRow);
+      row.appendChild(titleInput);
+      row.appendChild(descInput);
+      
+      container.appendChild(row);
+    }
+
+    document.getElementById('btn-info-add-missao').addEventListener('click', () => {
+      createMissaoItemRow('info-missao-container');
+    });
+
     // Auth State Check
     supabase.auth.onAuthStateChange(async (event, session) => {
       if (!session) {
@@ -814,12 +1021,12 @@
           .single();
         
         if (error || !data) {
-          alert('Acesso negado: Usuário não é administrador.');
+          showToast('Acesso negado: Usuário não é administrador.', 'error');
           await supabase.auth.signOut();
           window.location.href = 'login.html';
         }
       } catch (e) {
-        alert('Erro de autenticação.');
+        showToast('Erro de autenticação.', 'error');
         await supabase.auth.signOut();
         window.location.href = 'login.html';
       }
@@ -875,9 +1082,9 @@
           preview.src = publicUrl;
           preview.style.display = 'block';
         }
-        alert('Imagem carregada com sucesso!');
+        showToast('Imagem carregada com sucesso!', 'success');
       } catch (err) {
-        alert('Erro no upload: ' + err.message);
+        showToast('Erro no upload: ' + err.message, 'error');
       }
     }
 
@@ -934,17 +1141,25 @@
         copyBtn.style.display = 'inline-block';
         copyBtn.onclick = () => {
           navigator.clipboard.writeText(resInput.value);
-          alert('Markdown copiado para a área de transferência!');
+          showToast('Markdown copiado para a área de transferência!', 'success');
         };
       } catch (err) {
-        alert('Erro ao carregar imagem: ' + err.message);
+        showToast('Erro ao carregar imagem: ' + err.message, 'error');
       }
     });
 
     // CRUD Posts
     async function loadPosts() {
       const tbody = document.querySelector('#table-posts tbody');
-      tbody.innerHTML = '<tr><td colspan="5">Carregando...</td></tr>';
+      tbody.innerHTML = Array(3).fill(0).map(() => `
+        <tr class="skeleton-row">
+          <td><div class="skeleton-line w-[80%]"></div></td>
+          <td><div class="skeleton-line w-[40%]"></div></td>
+          <td><div class="skeleton-line w-[30%]"></div></td>
+          <td><div class="skeleton-line w-[50%]"></div></td>
+          <td><div class="skeleton-line w-[60%]"></div></td>
+        </tr>
+      `).join('');
       try {
         const { data, error } = await supabase
           .from('posts')
@@ -955,25 +1170,30 @@
 
         let html = '';
         (data || []).forEach(p => {
-          const destaqueText = p.destaque ? '<span class="text-xs bg-yellow-400 text-gray-900 font-bold px-2 py-0.5 rounded">Sim</span>' : '<span class="text-xs text-gray-400">Não</span>';
+          const typeBadge = p.tipo === 'notícia' || p.tipo === 'noticia'
+            ? '<span class="badge badge-noticia">Notícia</span>'
+            : '<span class="badge badge-artigo">Artigo</span>';
+          const destaqueText = p.destaque 
+            ? '<span class="badge badge-destaque"><i class="fa-solid fa-star"></i> Sim</span>' 
+            : '<span class="text-xs text-gray-400 dark:text-gray-500">Não</span>';
           html += `
             <tr>
-              <td data-label="Título">${p.titulo || 'Sem título'}</td>
-              <td data-label="Tipo">${p.tipo || '-'}</td>
+              <td data-label="Título" class="font-semibold">${p.titulo || 'Sem título'}</td>
+              <td data-label="Tipo">${typeBadge}</td>
               <td data-label="Destaque">${destaqueText}</td>
               <td data-label="Data">${p.data || '-'}</td>
               <td data-label="Ações">
                 <div class="actions">
-                  <button class="btn btn-sm btn-ghost" onclick="editPost('${p.id}')">Editar</button>
-                  <button class="btn btn-sm btn-ghost" style="color:#ff4a4a;" onclick="deletePost('${p.id}')">Excluir</button>
+                  <button class="btn btn-sm btn-ghost" onclick="editPost('${p.id}')" aria-label="Editar" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
+                  <button class="btn btn-sm btn-ghost text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20" onclick="deletePost('${p.id}')" aria-label="Excluir" title="Excluir"><i class="fa-solid fa-trash-can"></i></button>
                 </div>
               </td>
             </tr>
           `;
         });
-        tbody.innerHTML = html || '<tr><td colspan="5">Nenhum post encontrado.</td></tr>';
+        tbody.innerHTML = html || '<tr><td colspan="5" class="text-center py-6 text-gray-500">Nenhum post encontrado.</td></tr>';
       } catch (e) {
-        tbody.innerHTML = '<tr><td colspan="5">Erro ao carregar posts.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-6 text-red-500">Erro ao carregar posts.</td></tr>';
       }
     }
 
@@ -987,7 +1207,7 @@
         .eq('id', id)
         .single();
         
-      if (error) { alert('Erro ao carregar post'); return; }
+      if (error) { showToast('Erro ao carregar post.', 'error'); return; }
 
       document.getElementById('post-original-id').value = id;
       document.getElementById('post-id').value = id;
@@ -1006,13 +1226,19 @@
       } else {
         document.getElementById('post-capa-preview').style.display = 'none';
       }
-      easyMDE.value(p.conteudo || '');
+      if (easyMDE) {
+        easyMDE.value(p.conteudo || '');
+      }
     };
 
     window.deletePost = async (id) => {
       if(confirm('Tem certeza que deseja excluir este post?')) {
         const { error } = await supabase.from('posts').delete().eq('id', id);
-        if (error) alert('Erro ao deletar: ' + error.message);
+        if (error) {
+          showToast('Erro ao deletar: ' + error.message, 'error');
+        } else {
+          showToast('Post excluído com sucesso!', 'success');
+        }
         loadPosts();
       }
     };
@@ -1028,7 +1254,9 @@
       document.getElementById('post-capa-preview').style.display = 'none';
       document.getElementById('post-body-image-result').value = '';
       document.getElementById('btn-copy-body-image').style.display = 'none';
-      easyMDE.value('');
+      if (easyMDE) {
+        easyMDE.value('');
+      }
     });
 
     document.getElementById('btn-cancel-post').addEventListener('click', () => {
@@ -1062,7 +1290,7 @@
         tags: document.getElementById('post-tags').value.split(',').map(s=>s.trim()).filter(Boolean),
         resumo: document.getElementById('post-resumo').value,
         poster: document.getElementById('post-capa-url').value,
-        conteudo: easyMDE.value(),
+        conteudo: easyMDE ? easyMDE.value() : '',
         imagens: []
       };
 
@@ -1072,11 +1300,11 @@
         }
         const { error } = await supabase.from('posts').upsert(postData);
         if (error) throw error;
-        alert('Post salvo com sucesso!');
+        showToast('Post salvo com sucesso!', 'success');
         loadPosts();
         switchView('view-posts');
       } catch(err) {
-        alert('Erro ao salvar: ' + err.message);
+        showToast('Erro ao salvar: ' + err.message, 'error');
       } finally {
         btn.innerText = 'Salvar';
         btn.disabled = false;
@@ -1087,7 +1315,13 @@
     async function loadAuthors() {
       const tbody = document.querySelector('#table-authors tbody');
       const select = document.querySelector('#post-autor');
-      tbody.innerHTML = '<tr><td colspan="3">Carregando...</td></tr>';
+      tbody.innerHTML = Array(3).fill(0).map(() => `
+        <tr class="skeleton-row">
+          <td><div class="skeleton-line w-[70%]"></div></td>
+          <td><div class="skeleton-line w-[60%]"></div></td>
+          <td><div class="skeleton-line w-[50%]"></div></td>
+        </tr>
+      `).join('');
       try {
         const { data, error } = await supabase
           .from('authors')
@@ -1102,22 +1336,22 @@
         cachedAuthors.forEach(a => {
           html += `
             <tr>
-              <td data-label="Nome">${a.nome || 'Sem nome'}</td>
+              <td data-label="Nome" class="font-semibold">${a.nome || 'Sem nome'}</td>
               <td data-label="Cargo">${a.cargo || '-'}</td>
               <td data-label="Ações">
                 <div class="actions">
-                  <button class="btn btn-sm btn-ghost" onclick="editAuthor('${a.id}')">Editar</button>
-                  <button class="btn btn-sm btn-ghost" style="color:#ff4a4a;" onclick="deleteAuthor('${a.id}')">Excluir</button>
+                  <button class="btn btn-sm btn-ghost" onclick="editAuthor('${a.id}')" aria-label="Editar" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
+                  <button class="btn btn-sm btn-ghost text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20" onclick="deleteAuthor('${a.id}')" aria-label="Excluir" title="Excluir"><i class="fa-solid fa-trash-can"></i></button>
                 </div>
               </td>
             </tr>
           `;
           selectHtml += `<option value="${a.id}">${a.nome}</option>`;
         });
-        tbody.innerHTML = html || '<tr><td colspan="3">Nenhum integrante encontrado.</td></tr>';
+        tbody.innerHTML = html || '<tr><td colspan="3" class="text-center py-6 text-gray-500">Nenhum integrante encontrado.</td></tr>';
         if (select) select.innerHTML = selectHtml;
       } catch (e) {
-        tbody.innerHTML = '<tr><td colspan="3">Erro ao carregar integrantes.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="3" class="text-center py-6 text-red-500">Erro ao carregar integrantes.</td></tr>';
       }
     }
 
@@ -1131,7 +1365,7 @@
         .eq('id', id)
         .single();
 
-      if (error) { alert('Erro ao carregar integrante'); return; }
+      if (error) { showToast('Erro ao carregar integrante.', 'error'); return; }
 
       document.getElementById('author-original-id').value = id;
       document.getElementById('author-id').value = id;
@@ -1173,7 +1407,11 @@
     window.deleteAuthor = async (id) => {
       if(confirm('Tem certeza que deseja excluir este integrante?')) {
         const { error } = await supabase.from('authors').delete().eq('id', id);
-        if (error) alert('Erro ao deletar: ' + error.message);
+        if (error) {
+          showToast('Erro ao deletar: ' + error.message, 'error');
+        } else {
+          showToast('Integrante excluído com sucesso!', 'success');
+        }
         loadAuthors();
       }
     };
@@ -1271,7 +1509,7 @@
         }
         const { error } = await supabase.from('authors').upsert(authorData);
         if (error) throw error;
-        alert('Integrante salvo com sucesso!');
+        showToast('Integrante salvo com sucesso!', 'success');
         await loadAuthors();
         
         if (returnToPostOnAuthorSave) {
@@ -1285,7 +1523,7 @@
           switchView('view-authors');
         }
       } catch(err) {
-        alert('Erro ao salvar: ' + err.message);
+        showToast('Erro ao salvar: ' + err.message, 'error');
       } finally {
         btn.innerText = 'Salvar';
         btn.disabled = false;
@@ -1295,7 +1533,14 @@
     // CRUD Eventos
     async function loadEventos() {
       const tbody = document.querySelector('#table-eventos tbody');
-      tbody.innerHTML = '<tr><td colspan="4">Carregando...</td></tr>';
+      tbody.innerHTML = Array(3).fill(0).map(() => `
+        <tr class="skeleton-row">
+          <td><div class="skeleton-line w-[80%]"></div></td>
+          <td><div class="skeleton-line w-[40%]"></div></td>
+          <td><div class="skeleton-line w-[60%]"></div></td>
+          <td><div class="skeleton-line w-[50%]"></div></td>
+        </tr>
+      `).join('');
       try {
         const { data, error } = await supabase
           .from('eventos')
@@ -1308,21 +1553,21 @@
         (data || []).forEach(ev => {
           html += `
             <tr>
-              <td data-label="Título">${ev.titulo || 'Sem título'}</td>
+              <td data-label="Título" class="font-semibold">${ev.titulo || 'Sem título'}</td>
               <td data-label="Data">${ev.data || '-'}</td>
               <td data-label="Local">${ev.local || '-'}</td>
               <td data-label="Ações">
                 <div class="actions">
-                  <button class="btn btn-sm btn-ghost" onclick="editEvento('${ev.id}')">Editar</button>
-                  <button class="btn btn-sm btn-ghost" style="color:#ff4a4a;" onclick="deleteEvento('${ev.id}')">Excluir</button>
+                  <button class="btn btn-sm btn-ghost" onclick="editEvento('${ev.id}')" aria-label="Editar" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
+                  <button class="btn btn-sm btn-ghost text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20" onclick="deleteEvento('${ev.id}')" aria-label="Excluir" title="Excluir"><i class="fa-solid fa-trash-can"></i></button>
                 </div>
               </td>
             </tr>
           `;
         });
-        tbody.innerHTML = html || '<tr><td colspan="4">Nenhum evento encontrado.</td></tr>';
+        tbody.innerHTML = html || '<tr><td colspan="4" class="text-center py-6 text-gray-500">Nenhum evento encontrado.</td></tr>';
       } catch (e) {
-        tbody.innerHTML = '<tr><td colspan="4">Erro ao carregar eventos.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center py-6 text-red-500">Erro ao carregar eventos.</td></tr>';
       }
     }
 
@@ -1332,6 +1577,9 @@
       document.getElementById('form-evento').reset();
       document.getElementById('evento-id').value = '';
       document.getElementById('evento-capa-preview').style.display = 'none';
+      if (easyMDEEvento) {
+        easyMDEEvento.value('');
+      }
     });
 
     document.getElementById('btn-cancel-evento').addEventListener('click', () => {
@@ -1347,14 +1595,18 @@
         .eq('id', id)
         .single();
 
-      if (error) { alert('Erro ao carregar evento'); return; }
+      if (error) { showToast('Erro ao carregar evento.', 'error'); return; }
 
       document.getElementById('evento-id').value = ev.id;
       document.getElementById('evento-titulo').value = ev.titulo || '';
       document.getElementById('evento-data').value = ev.data || '';
       document.getElementById('evento-local').value = ev.local || '';
       document.getElementById('evento-capa-url').value = ev.capa || '';
-      document.getElementById('evento-descricao').value = ev.descricao || '';
+      if (easyMDEEvento) {
+        easyMDEEvento.value(ev.descricao || '');
+      } else {
+        document.getElementById('evento-descricao').value = ev.descricao || '';
+      }
 
       if (ev.capa) {
         document.getElementById('evento-capa-preview').src = ev.capa;
@@ -1367,7 +1619,11 @@
     window.deleteEvento = async (id) => {
       if(confirm('Tem certeza que deseja excluir este evento?')) {
         const { error } = await supabase.from('eventos').delete().eq('id', id);
-        if (error) alert('Erro ao excluir: ' + error.message);
+        if (error) {
+          showToast('Erro ao excluir: ' + error.message, 'error');
+        } else {
+          showToast('Evento excluído com sucesso!', 'success');
+        }
         loadEventos();
       }
     };
@@ -1385,18 +1641,18 @@
         data: document.getElementById('evento-data').value,
         local: document.getElementById('evento-local').value,
         capa: document.getElementById('evento-capa-url').value,
-        descricao: document.getElementById('evento-descricao').value,
+        descricao: easyMDEEvento ? easyMDEEvento.value() : document.getElementById('evento-descricao').value,
         imagens: []
       };
 
       try {
         const { error } = await supabase.from('eventos').upsert(evData);
         if (error) throw error;
-        alert('Evento salvo com sucesso!');
+        showToast('Evento salvo com sucesso!', 'success');
         loadEventos();
         switchView('view-eventos');
       } catch (err) {
-        alert('Erro ao salvar evento: ' + err.message);
+        showToast('Erro ao salvar evento: ' + err.message, 'error');
       } finally {
         btn.innerText = 'Salvar';
         btn.disabled = false;
@@ -1440,27 +1696,32 @@
         });
 
         // format quem_somos
-        const qsStr = (info.quem_somos?.paragrafos || []).join('\n');
-        document.getElementById('info-quemsomos').value = qsStr;
+        const qsMarkdown = info.quem_somos?.markdown || (info.quem_somos?.paragrafos || []).join('\n\n');
+        if (easyMDEQuemSomos) easyMDEQuemSomos.value(qsMarkdown);
 
         // format origem
-        const origStr = (info.nossa_origem?.paragrafos || []).join('\n');
-        document.getElementById('info-origem').value = origStr;
+        const origMarkdown = info.nossa_origem?.markdown || (info.nossa_origem?.paragrafos || []).join('\n\n');
+        if (easyMDEOrigem) easyMDEOrigem.value(origMarkdown);
 
         // format atividades
-        const atStr = (info.atividades?.paragrafos || []).join('\n');
-        document.getElementById('info-atividades').value = atStr;
+        const atMarkdown = info.atividades?.markdown || (info.atividades?.paragrafos || []).join('\n\n');
+        if (easyMDEAtividades) easyMDEAtividades.value(atMarkdown);
 
-        // format missao: Array of {titulo, descricao} -> string: Título|Descrição
-        const misStr = (info.atividades?.missao || []).map(m => `${m.titulo}|${m.descricao}`).join('\n');
-        document.getElementById('info-missao').value = misStr;
+        // format missao: Array of {titulo, descricao} -> populate container
+        const missaoContainer = document.getElementById('info-missao-container');
+        if (missaoContainer) {
+          missaoContainer.innerHTML = '';
+          (info.atividades?.missao || []).forEach(m => {
+            createMissaoItemRow('info-missao-container', m.titulo, m.descricao);
+          });
+        }
 
         document.getElementById('info-blog-keywords').value = info.blog_keywords || '';
         document.getElementById('info-blog-subtitulo').value = info.blog_subtitulo || '';
         document.getElementById('info-noticias-keywords').value = info.noticias_keywords || '';
         document.getElementById('info-noticias-subtitulo').value = info.noticias_subtitulo || '';
       } catch (e) {
-        alert('Erro ao carregar informações da página: ' + e.message);
+        showToast('Erro ao carregar informações da página: ' + e.message, 'error');
       }
     }
 
@@ -1491,23 +1752,23 @@
 
       // parse lists
       const quem_somos = {
-        paragrafos: document.getElementById('info-quemsomos').value.split('\n').map(s=>s.trim()).filter(Boolean)
+        markdown: easyMDEQuemSomos ? easyMDEQuemSomos.value() : ''
       };
       const nossa_origem = {
-        paragrafos: document.getElementById('info-origem').value.split('\n').map(s=>s.trim()).filter(Boolean)
+        markdown: easyMDEOrigem ? easyMDEOrigem.value() : ''
       };
 
-      const misRaw = document.getElementById('info-missao').value.split('\n');
-      const missao = misRaw.map(item => {
-        const pts = item.split('|');
-        if (pts.length >= 2) {
-          return { titulo: pts[0].trim(), descricao: pts.slice(1).join('|').trim() };
+      const missao = [];
+      document.querySelectorAll('#info-missao-container .missao-item-row').forEach(row => {
+        const titulo = row.querySelector('.missao-item-titulo').value.trim();
+        const descricao = row.querySelector('.missao-item-descricao').value.trim();
+        if (titulo && descricao) {
+          missao.push({ titulo, descricao });
         }
-        return null;
-      }).filter(Boolean);
+      });
 
       const atividades = {
-        paragrafos: document.getElementById('info-atividades').value.split('\n').map(s=>s.trim()).filter(Boolean),
+        markdown: easyMDEAtividades ? easyMDEAtividades.value() : '',
         missao
       };
 
@@ -1529,10 +1790,10 @@
       try {
         const { error } = await supabase.from('info_oedla').upsert(infoData);
         if (error) throw error;
-        alert('Informações atualizadas com sucesso!');
+        showToast('Informações atualizadas com sucesso!', 'success');
         loadInfo();
       } catch (err) {
-        alert('Erro ao salvar informações: ' + err.message);
+        showToast('Erro ao salvar informações: ' + err.message, 'error');
       } finally {
         btn.innerText = 'Salvar Configurações';
         btn.disabled = false;
@@ -1540,16 +1801,65 @@
     });
 
     async function initAdmin() {
-      await loadAuthors();
-      await loadPosts();
-      
-      easyMDE = new EasyMDE({ 
-        element: document.getElementById('post-conteudo'),
-        spellChecker: false,
-        status: false
-      });
+      if (typeof EasyMDE === 'undefined') {
+        setTimeout(initAdmin, 50);
+        return;
+      }
+
+      try {
+        easyMDE = new EasyMDE({ 
+          element: document.getElementById('post-conteudo'),
+          spellChecker: false,
+          status: false
+        });
+      } catch (e) {
+        console.error('Erro ao inicializar EasyMDE (Posts):', e);
+      }
+
+      try {
+        easyMDEEvento = new EasyMDE({ 
+          element: document.getElementById('evento-descricao'),
+          spellChecker: false,
+          status: false
+        });
+      } catch (e) {
+        console.error('Erro ao inicializar EasyMDE (Eventos):', e);
+      }
+
+      try {
+        easyMDEQuemSomos = new EasyMDE({ 
+          element: document.getElementById('info-quemsomos'),
+          spellChecker: false,
+          status: false
+        });
+      } catch (e) {
+        console.error('Erro ao inicializar EasyMDE (Quem Somos):', e);
+      }
+
+      try {
+        easyMDEOrigem = new EasyMDE({ 
+          element: document.getElementById('info-origem'),
+          spellChecker: false,
+          status: false
+        });
+      } catch (e) {
+        console.error('Erro ao inicializar EasyMDE (Nossa Origem):', e);
+      }
+
+      try {
+        easyMDEAtividades = new EasyMDE({ 
+          element: document.getElementById('info-atividades'),
+          spellChecker: false,
+          status: false
+        });
+      } catch (e) {
+        console.error('Erro ao inicializar EasyMDE (Atividades):', e);
+      }
 
       initScrollIndicator();
+
+      loadAuthors();
+      loadPosts();
     }
 
     function initScrollIndicator() {
