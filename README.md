@@ -2,11 +2,6 @@
 
 Este repositório contém o código-fonte do site do OEDLA, um observatório de pesquisa dedicado ao estudo da extrema direita na América Latina. O site é construído usando HTML, CSS e JavaScript, com Supabase (PostgreSQL + Auth + Storage) como backend, e é hospedado no GitHub Pages.
 
-## Documentação para colaboradores
-
-- [Como adicionar integrantes](docs/COMO_ADICIONAR_INTEGRANTES.md)
-- [Como publicar posts no blog](docs/COMO_PUBLICAR_POSTS.md)
-
 ## Banco de Dados (Supabase PostgreSQL)
 
 A aplicação utiliza o **Supabase** como banco de dados relacional. Abaixo está o diagrama das tabelas e seus campos.
