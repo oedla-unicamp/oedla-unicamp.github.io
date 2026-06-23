@@ -1,5 +1,5 @@
 import { supabase } from '../supabase-config.js';
-import { escapeHtml, normalizeAuthorKey } from './utils.js';
+import { escapeHtml, normalizeAuthorKey, updateMetaTags } from './utils.js';
 import { buildImportantLinks } from './social.js';
 
 let integrantesIndexPromise;
@@ -127,7 +127,12 @@ export async function loadIntegranteProfilePage() {
     </section>
   ` : '';
 
-  document.title = `${nome} | OEDLA`;
+  updateMetaTags({
+    title: `${nome} | OEDLA`,
+    description: minibiografia || `Membro da equipe do OEDLA: ${nome} (${cargo} - ${formacao})`,
+    image: imagem || null,
+    url: window.location.href
+  });
   container.innerHTML = `
     <div class="mb-12">
       <p class="font-sans text-sm font-bold uppercase tracking-widest text-primary mb-6"><a href="${getPath('pages/quemsomos.html')}" class="hover:text-gray-900 dark:hover:text-white transition-colors">&larr; Voltar para Equipe</a></p>

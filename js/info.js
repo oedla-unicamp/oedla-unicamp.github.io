@@ -1,25 +1,35 @@
 import { supabase } from '../supabase-config.js';
 import { getPath, escapeHtml, formatPostDatePtBr, normalizeCategoryValue, formatCategoryLabel, normalizeAuthorKey } from './utils.js';
-import { buildLabSocialLinks } from './social.js';
+import { buildLabSocialLinks, buildSocialLink } from './social.js';
 
-// Cache for info_oedla singleton
-let infoOedlaCache = null;
+// Cache promise for info_oedla singleton to prevent parallel query race condition
+let infoOedlaPromise = null;
 
 export async function getInfoOedla() {
-  if (infoOedlaCache) return infoOedlaCache;
-  const { data, error } = await supabase.from('info_oedla').select('*').eq('id', 'main').single();
-  if (error) { console.error('Erro ao carregar info_oedla:', error); return null; }
-  infoOedlaCache = data;
-  return data;
+  if (infoOedlaPromise) return infoOedlaPromise;
+
+  infoOedlaPromise = (async () => {
+    const { data, error } = await supabase.from('info_oedla').select('*').eq('id', 'main').single();
+    if (error) {
+      console.error('Erro ao carregar info_oedla:', error);
+      infoOedlaPromise = null; // Allow retrying on error
+      return null;
+    }
+    return data;
+  })();
+
+  return infoOedlaPromise;
 }
 
 export async function loadLabSocialLinks() {
-  const containers = document.querySelectorAll('#labiia-social-links');
+  const containers = document.querySelectorAll('.oedla-social-links');
   if (!containers.length) return;
   try {
     const info = await getInfoOedla();
     const redes = info?.redes_sociais || [];
-    const html = buildLabSocialLinks(redes);
+    const rssUrl = getPath('feed.xml');
+    const rssLinkHtml = buildSocialLink({ titulo: 'Feed RSS', url: rssUrl }, 'social-link');
+    const html = buildLabSocialLinks(redes) + rssLinkHtml;
     containers.forEach((c) => { c.innerHTML = html; });
   } catch (error) {
     containers.forEach((c) => { c.innerHTML = '<p class="preview-meta">Não foi possível carregar as redes do OEDLA.</p>'; });

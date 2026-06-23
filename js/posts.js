@@ -1,5 +1,5 @@
 import { supabase } from '../supabase-config.js';
-import { getPath, escapeHtml, formatPostDatePtBr, normalizeCategoryValue, formatCategoryLabel, slugifyHeading, getCurrentPageKey } from './utils.js';
+import { getPath, escapeHtml, formatPostDatePtBr, normalizeCategoryValue, formatCategoryLabel, slugifyHeading, getCurrentPageKey, updateMetaTags } from './utils.js';
 import { getIntegrantesIndex, resolveAuthorNames, buildIntegranteProfileUrl } from './authors.js';
 
 function buildPostTocAndHtml(markdownBody) {
@@ -235,7 +235,9 @@ async function loadPostsList(tipoFilter) {
   const grid = document.querySelector('#posts-grid');
   if (!grid) return;
   try {
-    const { data, error } = await supabase.from('posts').select('*');
+    const { data, error } = await supabase
+      .from('posts')
+      .select('id, data, categorias, titulo, resumo, poster, tipo, autor');
     if (error) throw error;
     const integrantesIndex = await getIntegrantesIndex();
     const filtered = (data || []).filter(p => {
@@ -306,7 +308,12 @@ export async function loadPostPage() {
     const backText = isNews ? 'Voltar para Notícias' : 'Voltar para o Blog';
     const backUrl = isNews ? getPath('pages/noticias.html') : getPath('pages/blog.html');
 
-    document.title = `${title} | OEDLA`;
+    updateMetaTags({
+      title: `${title} | OEDLA`,
+      description: excerpt,
+      image: image || null,
+      url: window.location.href
+    });
     article.innerHTML = `
       <div class="mb-12">
         <p class="font-sans text-sm font-bold uppercase tracking-widest text-primary mb-6"><a href="${backUrl}" class="hover:text-gray-900 dark:hover:text-white transition-colors">&larr; ${backText}</a></p>

@@ -1156,3 +1156,9 @@ a:hover {
   }
 }
 
+/* Modern Web: Performance Optimizations */
+.content-visibility-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
+}
+

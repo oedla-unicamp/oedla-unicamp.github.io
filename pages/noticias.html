@@ -3,8 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="view-transition" content="same-origin" />
   <title>Notícias | OEDLA</title>
   <meta name="description" content="Notícias curtas, boletins de monitoramento e acompanhamento de fatos conjunturais da extrema direita na América Latina.">
+  <meta property="og:title" content="Notícias | OEDLA" />
+  <meta property="og:description" content="Notícias curtas, boletins de monitoramento e acompanhamento de fatos conjunturais da extrema direita na América Latina." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://jnspgpmdmouvkmoqaxlc.supabase.co/storage/v1/object/public/public-assets/latin_america_map.png" />
+  <meta name="twitter:card" content="summary_large_image" />
   <script>
     (function () {
       const themeKey = 'oedla-theme';
@@ -58,7 +64,15 @@
 </head>
 <body data-page="noticias">
   <div class="page-glow" aria-hidden="true"></div>
-  <div id="site-header"></div>
+  <div id="site-header">
+    <nav class="hidden" aria-label="Navegação estática">
+      <a href="../index.html">Início</a>
+      <a href="quemsomos.html">Quem somos</a>
+      <a href="blog.html">Blog</a>
+      <a href="noticias.html">Notícias</a>
+      <a href="eventos.html">Eventos</a>
+    </nav>
+  </div>
 
   <main class="max-w-6xl mx-auto px-6 py-20">
     <section class="mb-16 border-b border-gray-200 dark:border-gray-800 pb-8">

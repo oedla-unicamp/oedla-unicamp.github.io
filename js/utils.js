@@ -78,3 +78,34 @@ export function slugifyHeading(text, usedSlugs) {
   usedSlugs.add(slug);
   return slug;
 }
+
+function setMeta(name, content, attribute = 'name') {
+  let element = document.querySelector(`meta[${attribute}="${name}"]`);
+  if (!element) {
+    element = document.createElement('meta');
+    element.setAttribute(attribute, name);
+    document.head.appendChild(element);
+  }
+  element.setAttribute('content', content);
+}
+
+export function updateMetaTags({ title, description, image, url }) {
+  if (title) {
+    document.title = title;
+    setMeta('og:title', title, 'property');
+    setMeta('twitter:title', title);
+  }
+  if (description) {
+    const cleanDesc = String(description).replace(/[\r\n\t]+/g, ' ').slice(0, 200).trim();
+    setMeta('description', cleanDesc);
+    setMeta('og:description', cleanDesc, 'property');
+    setMeta('twitter:description', cleanDesc);
+  }
+  if (image) {
+    setMeta('og:image', image, 'property');
+    setMeta('twitter:image', image);
+  }
+  if (url) {
+    setMeta('og:url', url, 'property');
+  }
+}

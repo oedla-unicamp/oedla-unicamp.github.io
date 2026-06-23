@@ -17,12 +17,12 @@ erDiagram
         date data "Data de publicação"
         varchar tipo "artigo | notícia"
         boolean destaque "Exibir no carrossel da home"
-        jsonb categorias "Lista de categorias"
-        jsonb tags "Lista de tags"
+        text_array categorias "Lista de categorias"
+        text_array tags "Lista de tags"
         text resumo "Resumo curto da publicação"
         text poster "URL da imagem de capa"
         text conteudo "Corpo em Markdown"
-        jsonb imagens "URLs de imagens adicionais"
+        text_array imagens "URLs de imagens adicionais"
     }
 
     AUTHORS {
@@ -36,13 +36,13 @@ erDiagram
     }
 
     EVENTOS {
-        varchar id PK "Slug ou identificador único"
+        uuid id PK "UUID gerado automaticamente"
         varchar titulo "Título do evento"
         date data "Data do evento"
         varchar local "Local do evento"
         text descricao "Descrição do evento"
         text capa "URL da imagem de capa"
-        jsonb imagens "URLs de imagens adicionais"
+        text_array imagens "URLs de imagens adicionais"
     }
 
     INFO_OEDLA {
@@ -61,8 +61,7 @@ erDiagram
     }
 
     ADMINS {
-        uuid id PK "UUID correspondente em auth.users"
-        varchar email "E-mail do administrador"
+        uuid uid PK "UUID correspondente em auth.users"
     }
 
     AUTHORS ||--o{ POSTS : "escreve"
@@ -78,9 +77,9 @@ erDiagram
 |--------------|----------------------|---------------------------------------------------------------------------|
 | `posts`      | Slug do título       | Publicações do tipo artigo (blog) ou notícia                              |
 | `authors`    | Slug do nome         | Integrantes/autores do observatório                                       |
-| `eventos`    | Slug do título       | Eventos organizados pelo observatório                                     |
+| `eventos`    | UUID                 | Eventos organizados pelo observatório                                     |
 | `info_oedla` | 'main'               | Configurações e textos dinâmicos das páginas institucionais               |
-| `admins`     | ID (auth.users)      | Usuários com permissão de acesso ao painel CMS (`pages/admin.html`)       |
+| `admins`     | UID (auth.users)     | Usuários com permissão de acesso ao painel CMS (`pages/admin.html`)       |
 
 ### Relacionamentos
 

@@ -143,7 +143,7 @@ export async function loadHomeLatestPosts() {
   try {
     const { data: postsData, error } = await supabase
       .from('posts')
-      .select('*');
+      .select('id, data, categorias, titulo, resumo, poster, tipo, destaque, autor');
     
     if (error) throw error;
 

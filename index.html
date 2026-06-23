@@ -4,9 +4,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="view-transition" content="same-origin" />
   <title>OEDLA | Observatório da Extrema Direita Latino-americana</title>
   <meta name="description"
     content="Análises acadêmicas e pesquisas sobre os movimentos de extrema direita na América Latina, promovendo o debate crítico e informado sobre os desafios democráticos contemporâneos.">
+  <meta property="og:title" content="OEDLA | Observatório da Extrema Direita Latino-americana" />
+  <meta property="og:description" content="Análises acadêmicas e pesquisas sobre os movimentos de extrema direita na América Latina, promovendo o debate crítico e informado sobre os desafios democráticos contemporâneos." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://jnspgpmdmouvkmoqaxlc.supabase.co/storage/v1/object/public/public-assets/latin_america_map.png" />
+  <meta name="twitter:card" content="summary_large_image" />
   <script>
     (function () {
       const themeKey = 'oedla-theme';
@@ -73,7 +79,15 @@
 
 <body data-page="home">
   <div class="page-glow" aria-hidden="true"></div>
-  <div id="site-header"></div>
+  <div id="site-header">
+    <nav class="hidden" aria-label="Navegação estática">
+      <a href="index.html">Início</a>
+      <a href="pages/quemsomos.html">Quem somos</a>
+      <a href="pages/blog.html">Blog</a>
+      <a href="pages/noticias.html">Notícias</a>
+      <a href="pages/eventos.html">Eventos</a>
+    </nav>
+  </div>
 
   <!-- Hero Section: Full width adapted background -->
   <section
@@ -116,7 +130,7 @@
         <!-- Nossas Redes -->
         <div class="mt-8 flex flex-col items-center gap-2.5">
           <p class="font-sans text-[10px] font-bold uppercase tracking-wider text-gray-400">Nossas Redes</p>
-          <div class="flex flex-wrap gap-3 justify-center" id="labiia-social-links">
+          <div class="flex flex-wrap gap-3 justify-center oedla-social-links">
             <p class="font-sans text-xs text-gray-400">Carregando redes...</p>
           </div>
         </div>
@@ -130,13 +144,15 @@
         </div>
         <img src="https://jnspgpmdmouvkmoqaxlc.supabase.co/storage/v1/object/public/public-assets/latin_america_map.png"
           alt="Mapa da América Latina"
+          fetchpriority="high"
+          decoding="sync"
           class="absolute w-full h-full object-contain opacity-30 md:opacity-60 invert z-10" />
       </div>
     </div>
   </section>
 
   <!-- Carousel Section: Últimas Adições (Investigação em Destaque) -->
-  <section class="py-20 bg-gray-50 dark:bg-gray-900/40 border-b border-gray-200 dark:border-gray-800">
+  <section class="py-20 bg-gray-50 dark:bg-gray-900/40 border-b border-gray-200 dark:border-gray-800 content-visibility-auto">
     <div class="max-w-5xl mx-auto px-6">
       <div class="flex items-center gap-2 mb-8">
         <span class="w-1.5 h-6 bg-primary rounded-sm"></span>
@@ -174,7 +190,7 @@
   </section>
 
   <!-- Main Previews -->
-  <main class="max-w-5xl mx-auto px-6 py-20">
+  <main class="max-w-5xl mx-auto px-6 py-20 content-visibility-auto">
     <!-- Blog Section (4 horizontal) -->
     <section class="mb-24">
       <div class="flex justify-between items-end border-b border-gray-200 dark:border-gray-800 pb-4 mb-8">

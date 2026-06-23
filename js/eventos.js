@@ -1,5 +1,5 @@
 import { supabase } from '../supabase-config.js';
-import { getPath, escapeHtml, formatPostDatePtBr, getCurrentPageKey } from './utils.js';
+import { getPath, escapeHtml, formatPostDatePtBr, getCurrentPageKey, updateMetaTags } from './utils.js';
 
 const mockEvents = {
   '11111111-1111-1111-1111-111111111111': {
@@ -218,15 +218,34 @@ export async function loadHomeEventos() {
   try {
     const { data, error } = await supabase
       .from('eventos')
-      .select('*')
-      .order('data', { ascending: false }); // mais recentes primeiro
+      .select('*');
       
     if (error) throw error;
     
     if (data && data.length) {
-      // Mostra apenas os 3 mais recentes no home
-      const latestThree = data.slice(0, 3);
-      grid.innerHTML = latestThree.map(buildEventoHomeCard).join('');
+      const d = new Date();
+      const todayStr = [
+        d.getFullYear(),
+        String(d.getMonth() + 1).padStart(2, '0'),
+        String(d.getDate()).padStart(2, '0')
+      ].join('-');
+
+      const future = [];
+      const past = [];
+      data.forEach(ev => {
+        if (ev.data && ev.data >= todayStr) {
+          future.push(ev);
+        } else {
+          past.push(ev);
+        }
+      });
+
+      future.sort((a, b) => new Date(a.data) - new Date(b.data));
+      past.sort((a, b) => new Date(b.data) - new Date(a.data));
+
+      // Shows up to 3 events, prioritizing upcoming ones
+      const combined = [...future, ...past].slice(0, 3);
+      grid.innerHTML = combined.map(buildEventoHomeCard).join('');
     } else {
       grid.innerHTML = placeholdersHomeHtml;
     }
@@ -243,13 +262,52 @@ export async function loadEventosList() {
   try {
     const { data, error } = await supabase
       .from('eventos')
-      .select('*')
-      .order('data', { ascending: false });
+      .select('*');
       
     if (error) throw error;
     
     if (data && data.length) {
-      grid.innerHTML = data.map(buildEventoListCard).join('');
+      const d = new Date();
+      const todayStr = [
+        d.getFullYear(),
+        String(d.getMonth() + 1).padStart(2, '0'),
+        String(d.getDate()).padStart(2, '0')
+      ].join('-');
+
+      const future = [];
+      const past = [];
+      data.forEach(ev => {
+        if (ev.data && ev.data >= todayStr) {
+          future.push(ev);
+        } else {
+          past.push(ev);
+        }
+      });
+
+      future.sort((a, b) => new Date(a.data) - new Date(b.data));
+      past.sort((a, b) => new Date(b.data) - new Date(a.data));
+
+      let html = '';
+      if (future.length) {
+        html += `
+          <div class="flex flex-col gap-6">
+            ${future.map(buildEventoListCard).join('')}
+          </div>
+        `;
+      }
+      
+      if (past.length) {
+        html += `
+          <div class="${future.length ? 'mt-20 pt-10 border-t border-gray-200 dark:border-gray-800' : ''}">
+            <h2 class="font-serif text-3xl font-bold text-gray-900 dark:text-white mb-8">Eventos Anteriores</h2>
+            <div class="flex flex-col gap-6">
+              ${past.map(buildEventoListCard).join('')}
+            </div>
+          </div>
+        `;
+      }
+      
+      grid.innerHTML = html;
     } else {
       grid.innerHTML = placeholdersListHtml;
     }
@@ -328,7 +386,12 @@ function renderEventDetail(ev, container) {
     `;
   }
   
-  document.title = `${title} | OEDLA`;
+  updateMetaTags({
+    title: `${title} | OEDLA`,
+    description: desc || `Agenda de Eventos OEDLA: ${title} no dia ${dateStr} em ${location}`,
+    image: image || null,
+    url: window.location.href
+  });
   container.innerHTML = `
     <div class="mb-12">
       <p class="font-sans text-sm font-bold uppercase tracking-widest text-primary mb-6"><a href="${getPath('pages/eventos.html')}" class="hover:text-gray-900 dark:hover:text-white transition-colors">&larr; Voltar para Eventos</a></p>
