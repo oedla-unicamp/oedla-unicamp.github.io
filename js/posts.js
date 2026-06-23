@@ -1,13 +1,12 @@
 import { supabase } from '../supabase-config.js';
 import { getPath, escapeHtml, formatPostDatePtBr, normalizeCategoryValue, formatCategoryLabel, slugifyHeading, getCurrentPageKey, updateMetaTags } from './utils.js';
 import { getIntegrantesIndex, resolveAuthorNames, buildIntegranteProfileUrl } from './authors.js';
-import DOMPurify from 'https://esm.sh/dompurify';
 
 function buildPostTocAndHtml(markdownBody) {
   if (!window.marked || typeof window.marked.parse !== 'function') {
     return { html: `<pre>${escapeHtml(markdownBody)}</pre>`, toc: [] };
   }
-  const rawHtml = DOMPurify.sanitize(window.marked.parse(markdownBody));
+  const rawHtml = window.marked.parse(markdownBody);
   const parser = new DOMParser();
   const doc = parser.parseFromString(rawHtml, 'text/html');
   const usedSlugs = new Set();
@@ -238,8 +237,7 @@ async function loadPostsList(tipoFilter) {
   try {
     const { data, error } = await supabase
       .from('posts')
-      .select('id, data, categorias, titulo, resumo, poster, tipo, autor')
-      .order('data', { ascending: false });
+      .select('id, data, categorias, titulo, resumo, poster, tipo, autor');
     if (error) throw error;
     const integrantesIndex = await getIntegrantesIndex();
     const filtered = (data || []).filter(p => {

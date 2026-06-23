@@ -19,6 +19,7 @@ export function inferIconFromLink(titulo, url) {
     { match: () => href.includes('t.me') || href.includes('telegram.') || title.includes('telegram'), icon: 'telegram' },
     { match: () => href.includes('wa.me') || href.includes('whatsapp') || title.includes('whatsapp'), icon: 'whatsapp' },
     { match: () => href.includes('mastodon') || title.includes('mastodon'), icon: 'mastodon' },
+    { match: () => href.includes('rss') || title.includes('rss') || href.endsWith('.xml') || title.includes('feed'), icon: 'rss' },
   ];
   const matched = rules.find((rule) => rule.match());
   return matched ? matched.icon : '';
@@ -40,6 +41,7 @@ export function resolveConfiguredIconClass(rawIcon) {
     'brand-github': 'fa-brands fa-github',
     orcid: 'fa-brands fa-orcid',
     'id-badge-2': 'fa-brands fa-orcid',
+    rss: 'fa-solid fa-rss',
   };
   if (aliasMap[value]) return aliasMap[value];
   const normalized = value.replace(/^fa\s+/, '').replace(/^fa-/, '').replace(/^icon-/, '');

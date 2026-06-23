@@ -1,8 +1,0 @@
-{
-  "name": "oedla",
-  "private": true,
-  "scripts": {
-    "build:css": "npx -y tailwindcss@3 -i ./src/tailwind-input.css -o ./tailwind.css --minify",
-    "dev:css": "npx -y tailwindcss@3 -i ./src/tailwind-input.css -o ./tailwind.css --watch"
-  }
-}

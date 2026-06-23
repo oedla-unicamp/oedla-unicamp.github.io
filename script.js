@@ -1,6 +1,10 @@
 import { loadLayoutComponents, wireMobileMenu } from './js/layout.js';
 import { wireThemeToggle } from './js/theme.js';
-import { getCurrentPageKey } from './js/utils.js';
+import { loadLabSocialLinks, loadHeroDynamic, loadBlogPageInfo, loadQuemSomosDynamic } from './js/info.js';
+import { loadHomeLatestPosts } from './js/home.js';
+import { loadBlogList, loadNoticiasList, loadPostPage } from './js/posts.js';
+import { loadIntegrantesPage, loadIntegranteProfilePage } from './js/authors.js';
+import { loadHomeEventos, loadEventosList, loadEventoPage } from './js/eventos.js';
 
 async function initPage() {
   try {
@@ -12,57 +16,22 @@ async function initPage() {
   wireMobileMenu();
   wireThemeToggle();
 
-  const page = getCurrentPageKey();
-
-  // Load only the modules needed for the current page
-  const loaders = [];
-
-  // Social links appear on all pages (header/footer)
-  const { loadLabSocialLinks, loadHeroDynamic, loadBlogPageInfo, loadQuemSomosDynamic } = await import('./js/info.js');
-  loaders.push(loadLabSocialLinks());
-
-  if (page === 'home') {
-    loaders.push(loadHeroDynamic());
-    const { loadHomeLatestPosts } = await import('./js/home.js');
-    loaders.push(loadHomeLatestPosts());
-    const { loadHomeEventos } = await import('./js/eventos.js');
-    loaders.push(loadHomeEventos());
-  }
-
-  if (page === 'blog' || page === 'noticias') {
-    loaders.push(loadBlogPageInfo());
-    const { loadBlogList, loadNoticiasList } = await import('./js/posts.js');
-    if (page === 'blog') loaders.push(loadBlogList());
-    if (page === 'noticias') loaders.push(loadNoticiasList());
-  }
-
-  if (page === 'post') {
-    const { loadPostPage } = await import('./js/posts.js');
-    loaders.push(loadPostPage());
-  }
-
-  if (page === 'about') {
-    loaders.push(loadQuemSomosDynamic());
-    const { loadIntegrantesPage } = await import('./js/authors.js');
-    loaders.push(loadIntegrantesPage());
-  }
-
-  if (page === 'integrante' || page === 'about') {
-    const { loadIntegranteProfilePage } = await import('./js/authors.js');
-    loaders.push(loadIntegranteProfilePage());
-  }
-
-  if (page === 'eventos') {
-    const { loadEventosList } = await import('./js/eventos.js');
-    loaders.push(loadEventosList());
-  }
-
-  if (page === 'evento') {
-    const { loadEventoPage } = await import('./js/eventos.js');
-    loaders.push(loadEventoPage());
-  }
-
-  await Promise.all(loaders);
+  // Load content
+  await Promise.all([
+    loadLabSocialLinks(),
+    loadHeroDynamic(),
+    loadBlogPageInfo(),
+    loadQuemSomosDynamic(),
+    loadHomeLatestPosts(),
+    loadBlogList(),
+    loadNoticiasList(),
+    loadPostPage(),
+    loadIntegrantesPage(),
+    loadIntegranteProfilePage(),
+    loadHomeEventos(),
+    loadEventosList(),
+    loadEventoPage(),
+  ]);
 }
 
 initPage();

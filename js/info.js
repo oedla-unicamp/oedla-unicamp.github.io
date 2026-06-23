@@ -1,8 +1,6 @@
 import { supabase } from '../supabase-config.js';
-import { escapeHtml, formatPostDatePtBr, normalizeCategoryValue, formatCategoryLabel, normalizeAuthorKey } from './utils.js';
-import { buildLabSocialLinks } from './social.js';
-import DOMPurify from 'https://esm.sh/dompurify';
-import { marked } from 'https://esm.sh/marked';
+import { getPath, escapeHtml, formatPostDatePtBr, normalizeCategoryValue, formatCategoryLabel, normalizeAuthorKey } from './utils.js';
+import { buildLabSocialLinks, buildSocialLink } from './social.js';
 
 // Cache promise for info_oedla singleton to prevent parallel query race condition
 let infoOedlaPromise = null;
@@ -29,7 +27,9 @@ export async function loadLabSocialLinks() {
   try {
     const info = await getInfoOedla();
     const redes = info?.redes_sociais || [];
-    const html = buildLabSocialLinks(redes);
+    const rssUrl = getPath('feed.xml');
+    const rssLinkHtml = buildSocialLink({ titulo: 'Feed RSS', url: rssUrl }, 'social-link');
+    const html = buildLabSocialLinks(redes) + rssLinkHtml;
     containers.forEach((c) => { c.innerHTML = html; });
   } catch (error) {
     containers.forEach((c) => { c.innerHTML = '<p class="preview-meta">Não foi possível carregar as redes do OEDLA.</p>'; });
@@ -97,23 +97,17 @@ export async function loadQuemSomosDynamic() {
     const info = await getInfoOedla();
     if (!info) return;
 
-    if (qsContainer) {
-      const markdown = info.quem_somos?.markdown || (info.quem_somos?.paragrafos || []).join('\n\n');
-      const htmlContent = marked.parse(markdown);
-      qsContainer.innerHTML = DOMPurify.sanitize(htmlContent);
+    if (qsContainer && info.quem_somos?.paragrafos) {
+      qsContainer.innerHTML = info.quem_somos.paragrafos.map(p => `<p>${escapeHtml(p)}</p>`).join('');
     }
-    if (orContainer) {
-      const markdown = info.nossa_origem?.markdown || (info.nossa_origem?.paragrafos || []).map((p, i) => {
-        if (i === 0) return `*${p}*`;
-        return p;
-      }).join('\n\n');
-      const htmlContent = marked.parse(markdown);
-      orContainer.innerHTML = DOMPurify.sanitize(htmlContent);
+    if (orContainer && info.nossa_origem?.paragrafos) {
+      orContainer.innerHTML = info.nossa_origem.paragrafos.map((p, i) => {
+        if (i === 0) return `<p class="font-sans text-xl text-gray-800 dark:text-gray-200 font-medium mb-6"><em class="italic font-serif">${escapeHtml(p)}</em></p>`;
+        return `<p class="font-sans text-lg text-gray-600 dark:text-gray-400 leading-relaxed">${escapeHtml(p)}</p>`;
+      }).join('');
     }
-    if (atContainer) {
-      const markdown = info.atividades?.markdown || (info.atividades?.paragrafos || []).join('\n\n');
-      const htmlContent = marked.parse(markdown);
-      atContainer.innerHTML = DOMPurify.sanitize(htmlContent);
+    if (atContainer && info.atividades?.paragrafos) {
+      atContainer.innerHTML = info.atividades.paragrafos.map(p => `<p>${escapeHtml(p)}</p>`).join('');
     }
     if (msContainer && info.atividades?.missao) {
       msContainer.innerHTML = info.atividades.missao.map(item => `

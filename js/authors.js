@@ -1,5 +1,5 @@
 import { supabase } from '../supabase-config.js';
-import { getPath, escapeHtml, normalizeAuthorKey, formatPostDatePtBr, formatCategoryLabel, updateMetaTags } from './utils.js';
+import { escapeHtml, normalizeAuthorKey, updateMetaTags } from './utils.js';
 import { buildImportantLinks } from './social.js';
 
 let integrantesIndexPromise;
@@ -89,6 +89,7 @@ export async function loadIntegranteProfilePage() {
   const integrante = integrantesIndex.get(slug);
   if (!integrante) { container.innerHTML = '<h1>Integrante não encontrado</h1>'; return; }
 
+  const { getPath } = await import('./utils.js');
   const nome = escapeHtml(integrante.nome || 'Integrante');
   const cargo = escapeHtml(integrante.cargo || '');
   const formacao = escapeHtml(integrante.formacao || '');
@@ -97,6 +98,7 @@ export async function loadIntegranteProfilePage() {
   const links = buildImportantLinks(integrante.links || []);
 
   const { data: postsData } = await supabase.from('posts').select('*').eq('autor', slug);
+  const { formatPostDatePtBr, formatCategoryLabel } = await import('./utils.js');
   const authoredPosts = (postsData || []).map(post => ({
     slug: post.id,
     title: post.titulo || 'Sem título',
