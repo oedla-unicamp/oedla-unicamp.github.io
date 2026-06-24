@@ -1,0 +1,15 @@
+# Dependências Node.js
+*node_modules/
+scripts/node_modules/
+npm-debug.log*
+
+# Variáveis de ambiente
+.env
+.env.local
+
+# Arquivos de sistema operacional (Mac/Windows)
+.DS_Store
+Thumbs.db
+
+# Pastas de cache e ferramentas (Agent/Gemini)
+.gemini/

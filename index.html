@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="view-transition" content="same-origin" />
+  <title>OEDLA | Observatório da Extrema Direita Latino-americana</title>
+  <meta name="description" content="Análises acadêmicas e pesquisas sobre os movimentos de extrema direita na América Latina, promovendo o debate crítico e informado sobre os desafios democráticos contemporâneos.">
+  <meta property="og:title" content="OEDLA | Observatório da Extrema Direita Latino-americana" />
+  <meta property="og:description" content="Análises acadêmicas e pesquisas sobre os movimentos de extrema direita na América Latina, promovendo o debate crítico e informado sobre os desafios democráticos contemporâneos." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://jnspgpmdmouvkmoqaxlc.supabase.co/storage/v1/object/public/public-assets/latin_america_map.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo+Narrow:ital,wght@0,400..700;1,400..700&family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
+
+  <!-- EasyMDE (for Admin Markdown Editor) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+
+  <!-- Prevent dark mode flash -->
+  <script>
+    (function () {
+      const themeKey = 'oedla-theme';
+      const backgroundKey = 'oedla-bg-image';
+      const bgLight = 'assets/img/background-light.png';
+      const bgDark = 'assets/img/background-dark.png';
+      let theme = '';
+      try {
+        const saved = localStorage.getItem(themeKey);
+        theme = saved === 'dark' || saved === 'light'
+          ? saved
+          : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      } catch (_error) {
+        theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+
+      const expectedBackground = theme === 'dark' ? bgDark : bgLight;
+      let backgroundPath = expectedBackground;
+      try {
+        const storedBackground = localStorage.getItem(backgroundKey);
+        backgroundPath = storedBackground === expectedBackground
+          ? storedBackground
+          : expectedBackground;
+      } catch (_error) {
+        backgroundPath = expectedBackground;
+      }
+
+      const root = document.documentElement;
+      root.setAttribute('data-theme', theme);
+      root.style.setProperty('--page-bg-image', `url('${backgroundPath}')`);
+
+      try {
+        localStorage.setItem(backgroundKey, backgroundPath);
+      } catch (_error) {
+        // Ignore storage failures.
+      }
+    })();
+  </script>
+  <script type="module" crossorigin src="/assets/index-DXk0g1dS.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-Bxp4A4Hp.css">
+</head>
+<body>
+  <div id="root"></div>
+</body>
+</html>
